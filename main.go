@@ -173,9 +173,9 @@ func main() {
 					fmt.Printf("\n")
 					log.Printf("Error: %s\n", err.Error())
 				} else {
-					fmt.Println("------------------------------------------")
+					fmt.Println("-----------------------------------------")
 					fmt.Printf("User Information\n")
-					fmt.Println("------------------------------------------")
+					fmt.Println("-----------------------------------------")
 					fmt.Printf("ID\t\t: %d\n", otherAccount.ID)
 					fmt.Printf("Full Name\t: %s\n", otherAccount.FullName)
 					fmt.Printf("Birth Date\t: %s\n", otherAccount.BirthDate)
@@ -183,7 +183,7 @@ func main() {
 					fmt.Printf("Email\t\t: %s\n", otherAccount.Email)
 					fmt.Printf("Phone Number\t: %s\n", otherAccount.PhoneNumber)
 					fmt.Printf("Balance\t\t: %.2f\n", otherAccount.Balance)
-					fmt.Println("------------------------------------------")
+					fmt.Println("-----------------------------------------")
 				}
 			}
 		case 11:
