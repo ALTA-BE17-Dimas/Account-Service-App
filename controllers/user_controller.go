@@ -71,7 +71,7 @@ func DeleteAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	}
 
 	var storedPassword string
-	sqlQuery2 := "SELECT password FROM users WHERE phone = ?"
+	sqlQuery2 := `SELECT password FROM users WHERE phone = ?`
 	err = db.QueryRow(sqlQuery2, phoneNumber).Scan(&storedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {

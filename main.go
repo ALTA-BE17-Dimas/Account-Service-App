@@ -147,7 +147,6 @@ func main() {
 			} else {
 				fmt.Println(str)
 			}
-
 		case 5:
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
@@ -157,6 +156,7 @@ func main() {
 					fmt.Printf("\n")
 					log.Printf("Error: %s\n", err.Error())
 				} else {
+					fmt.Printf("\n")
 					fmt.Printf("%s\n", str)
 				}
 			}
