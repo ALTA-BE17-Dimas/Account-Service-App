@@ -85,15 +85,15 @@ func DeleteAccount(db *sql.DB, phoneNumber string) (string, error) {
 	if rowsAffected == 0 {
 		outputStr = fmt.Sprintln("User not found. Cannot delete account")
 	} else {
-		outputStr = fmt.Sprintf("User deleted successfully. Rows affected: %d\n", rowsAffected)
+		outputStr = fmt.Sprintf("Account deleted successfully. Rows affected: %d\n", rowsAffected)
 	}
 
 	return outputStr, nil
 }
 
 //proses login
-//mendeklarasikan variabel phone dan pass sebagai parameter fungsi loginUser
-func LoginAccount(db *sql.DB, phonenumber, password string) (string, error) {
+//mendeklarasikan variabel phone dan pass sebagai parameter fungsi loginAccount
+func LoginAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	
 	//query untuk memeriksa kecocokkan username dan password
 	//mendefinisikan query
@@ -107,10 +107,10 @@ func LoginAccount(db *sql.DB, phonenumber, password string) (string, error) {
 	}
 	var user models.User 
 	//eksekusi pemanggilan query kedatabase
-	err = stmt.QueryRow(phonenumber).Scan(&user.ID, &user.PhoneNumber, &user.Password)
+	err = stmt.QueryRow(phoneNumber).Scan(&user.ID, &user.PhoneNumber, &user.Password)
 	if err!= nil {
 		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("login failed: Invalid phone")
+			return "", fmt.Errorf("login failed: Invalid phone number")
 		} else {
 			return "", err
 		}
