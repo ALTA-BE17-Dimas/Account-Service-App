@@ -59,3 +59,35 @@ func UserRegister(db *sql.DB, user models.User) (string, error) {
 	outputStr := fmt.Sprintf("User with ID %d registered successfully.", id)
 	return outputStr, nil
 }
+
+//proses login
+//mendeklarasikan variabel phone dan pass sebagai parameter fungsi loginUser
+func LoginUsers(db *sql.DB, phonenumber, password string) (string, error) {
+	
+	//query untuk memeriksa kecocokkan username dan password
+	//mendefinisikan query
+	query:= "SELECT id, phone, password FROM users WHERE phone = ? LIMIT 1"
+	
+	var user models.User 
+	//eksekusi pemanggilan query kedatabase
+	//
+	err := db.QueryRow(query, phonenumber).Scan(&user.ID, &user.PhoneNumber, &user.Password)
+	if err!= nil {
+		if err == sql.ErrNoRows {
+			return "", fmt.Errorf("login failed: Invalid phone")
+		} else {
+			return "", err
+		}
+	}
+	//mengembalikan objek user yang berhasil ditemukan
+	
+	//compare password dengan hash password
+	err = helpers.ComparePass([]byte(user.Password), []byte(password))
+	if err != nil {
+		return "", fmt.Errorf("login failed: Invalid password")
+	}
+
+	outputStr := fmt.Sprint("Login successful!")
+	return outputStr, nil
+	
+}
