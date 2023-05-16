@@ -138,6 +138,7 @@ func main() {
 			fmt.Print("Password: ")
 			fmt.Scanln(&password)
 			
+			fmt.Println("\nLogin:")
 			user, err := controllers.LoginAccount(db, phoneNumber, password)
 			fmt.Print("\nPassword: ")
 			if err != nil {
@@ -145,7 +146,22 @@ func main() {
 			} else {
 			fmt.Println(user)
 			}
+		case 3:
+			//read account
+			var phoneNumber, password string
+			fmt.Print("Phone number: ")
+			fmt.Scanln(&phoneNumber)
+			fmt.Print("Password: ")
+			fmt.Scanln(&password)
+		
 			
+			user, err := controllers.ReadAccount(db, phoneNumber, password)
+			fmt.Print("\n")
+			if err != nil {
+				log.Printf("Error: %s\n", err.Error())
+			} else {
+			fmt.Println(user)
+			}	
 		case 5:
 			var phoneNumber string
 			fmt.Print("Enter phone number: ")

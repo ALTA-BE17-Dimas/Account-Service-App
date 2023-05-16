@@ -125,3 +125,34 @@ func LoginAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	return outputStr, nil
 	
 }
+
+func ReadAccount(db *sql.DB, phoneNumber, password string) (string, error) {
+	sqlStatement := 
+	`SELECT full_name, identity_number, birth_date, address, email, phone, balance, password 
+		FROM users WHERE phone=?`
+
+	// prepared statement from the SQL statement before executed
+	stmt, err := db.Prepare(sqlStatement)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//var fullName, identityNumber, birthDate, address, email, Password string
+	//var Balance float64
+	var user models.User
+	err = stmt.QueryRow(phoneNumber).Scan(&user.FullName, &user.IdentityNumber, &user.BirthDate, &user.Address, &user.Email, &user.PhoneNumber, &user.Balance, &user.Password)
+	if err != nil {
+		if err == sql.ErrNoRows{
+			return "", fmt.Errorf("User not found")
+		}
+		return "", fmt.Errorf("Error reading account: %v", err)
+	}
+
+	err = helpers.ComparePass([]byte(user.Password), []byte(password))
+	if err != nil {
+		return "", fmt.Errorf("login failed: Invalid password")
+	}
+
+	outputStr := fmt.Sprintf("Account found:\nFull Name: %s\nIndentity Number: %s\nBirth of Date: %s\nEmail: %s\nPhone Number: %s\nAddress: %s\nBalance: %f\n", user.FullName, user.IdentityNumber, user.BirthDate, user.Email, user.PhoneNumber, user.Address, user.Balance)
+
+	return outputStr, nil
+}
