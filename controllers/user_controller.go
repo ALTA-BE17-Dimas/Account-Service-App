@@ -60,7 +60,7 @@ func RegisterUser(db *sql.DB, user models.User) (string, error) {
 	return outputStr, nil
 }
 
-func DeleteUser(db *sql.DB, phoneNumber string) {
+func DeleteUser(db *sql.DB, phoneNumber string) string {
 	sqlStatement := `DELETE FROM users WHERE phone=?`
 
 	// prepared statement from the SQL statement before executed
@@ -77,8 +77,7 @@ func DeleteUser(db *sql.DB, phoneNumber string) {
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		log.Println("Error:", err)
-		return
 	}
 
-	log.Printf("User deleted successfully. Rows affected: %d\n", rowsAffected)
+	return fmt.Sprintf("User deleted successfully. Rows affected: %d\n", rowsAffected)
 }
