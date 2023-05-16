@@ -19,14 +19,14 @@ func main() {
 
 	// create new user
 	newUser := models.User{
-		FullName:             "Dimas Pradana",
-		SingleIdentityNumber: "1234567890",
-		BirthDate:            "07-07-1990",
-		Address:              "23 Brookmead, Thornbury England",
-		Email:                "dimasprd11@gmail.com",
-		PhoneNumber:          "089978234511",
-		Password:             "fsaghdRTUbjkWhs1@&",
-		Balance:              10000,
+		FullName:       "Dimas Pradana",
+		IdentityNumber: "1234567890",
+		BirthDate:      "07-07-1990",
+		Address:        "23 Brookmead, Thornbury England",
+		Email:          "dimasprd11@gmail.com",
+		PhoneNumber:    "089978234511",
+		Password:       "fsaghdRTUbjkWhs1@&",
+		Balance:        10000,
 	}
 
 	// register new user
