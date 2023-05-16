@@ -116,7 +116,6 @@ func LoginAccount(db *sql.DB, phonenumber, password string) (string, error) {
 		}
 	}
 	//mengembalikan objek user yang berhasil ditemukan
-	
 	//compare password dengan hash password
 	err = helpers.ComparePass([]byte(user.Password), []byte(password))
 	if err != nil {
