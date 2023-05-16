@@ -147,7 +147,7 @@ func main() {
 			}
 		case 3:
 			//read account
-			var phoneNumber, password string
+			
 			fmt.Print("Enter phone number: ")
 			fmt.Scanln(&phoneNumber)
 			fmt.Print("Enter password: ")
