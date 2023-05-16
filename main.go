@@ -40,8 +40,6 @@ func main() {
 	---------------------------------
 	`
 	var phoneNumber, password string
-	phoneNumber = "982645472"
-	password = "Asdfghjkl!"
 
 	loop := true
 	for loop {
@@ -138,21 +136,18 @@ func main() {
 				fmt.Printf("%s\n", str)
 			}
 		case 2:
-			//Login account
-			var phoneNumber, password string
-			fmt.Print("Phone number: ")
+			fmt.Print("\nEnter phone number: ")
 			fmt.Scanln(&phoneNumber)
-			fmt.Print("Password: ")
+			fmt.Print("\nEnter password: ")
 			fmt.Scanln(&password)
-			
-			user, err := controllers.LoginAccount(db, phoneNumber, password)
-			fmt.Print("\nPassword: ")
+
+			str, err := controllers.LoginAccount(db, phoneNumber, password)
 			if err != nil {
 				log.Printf("Error: %s\n", err.Error())
 			} else {
-			fmt.Println(user)
+				fmt.Println(str)
 			}
-			
+
 		case 5:
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
@@ -162,7 +157,6 @@ func main() {
 					fmt.Printf("\n")
 					log.Printf("Error: %s\n", err.Error())
 				} else {
-					fmt.Printf("\n")
 					fmt.Printf("%s\n", str)
 				}
 			}
