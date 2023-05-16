@@ -138,7 +138,6 @@ func main() {
 			fmt.Print("Password: ")
 			fmt.Scanln(&password)
 			
-			fmt.Println("\nLogin:")
 			user, err := controllers.LoginAccount(db, phoneNumber, password)
 			fmt.Print("\nPassword: ")
 			if err != nil {
@@ -149,9 +148,9 @@ func main() {
 		case 3:
 			//read account
 			var phoneNumber, password string
-			fmt.Print("Phone number: ")
+			fmt.Print("Enter phone number: ")
 			fmt.Scanln(&phoneNumber)
-			fmt.Print("Password: ")
+			fmt.Print("Enter password: ")
 			fmt.Scanln(&password)
 		
 			

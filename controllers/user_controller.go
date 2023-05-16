@@ -152,7 +152,7 @@ func ReadAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 		return "", fmt.Errorf("login failed: Invalid password")
 	}
 
-	outputStr := fmt.Sprintf("Account found:\nFull Name: %s\nIndentity Number: %s\nBirth of Date: %s\nEmail: %s\nPhone Number: %s\nAddress: %s\nBalance: %f\n", user.FullName, user.IdentityNumber, user.BirthDate, user.Email, user.PhoneNumber, user.Address, user.Balance)
+	outputStr := fmt.Sprintf("Account Profil:\nFull Name: %s\nIndentity Number: %s\nBirth of Date: %s\nEmail: %s\nPhone Number: %s\nAddress: %s\nBalance: %f\n", user.FullName, user.IdentityNumber, user.BirthDate, user.Email, user.PhoneNumber, user.Address, user.Balance)
 
 	return outputStr, nil
 }
