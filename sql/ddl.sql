@@ -43,37 +43,3 @@ CREATE TABLE `Top_Up_Histories`(
     CONSTRAINT fk_Top_Up_Histories_Users
         FOREIGN KEY (`user_id`) REFERENCES Users(`id`)
 );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
