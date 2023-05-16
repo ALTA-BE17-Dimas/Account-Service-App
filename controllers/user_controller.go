@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func RegisterUser(db *sql.DB, user models.User) (string, error) {
+func RegisterAccount(db *sql.DB, user models.User) (string, error) {
 	sqlStatement := `
 	INSERT INTO users (
 		full_name, identity_number, birth_date, address, email, phone, password, balance
@@ -18,28 +18,29 @@ func RegisterUser(db *sql.DB, user models.User) (string, error) {
 	// prepared statement from the SQL statement before executed
 	stmt, err := db.Prepare(sqlStatement)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error:", err.Error())
 	}
 
 	// validating email format
-	if emailIsValid := helpers.ValidateEmail(user.Email); !emailIsValid {
-		log.Fatal("email format is invalid")
+	emailIsValid, err := helpers.ValidateEmail(user.Email)
+	if !emailIsValid {
+		log.Println("Error:", err.Error())
 	}
 
 	// validating birth date format
-	valid, birthDate, _ := helpers.ValidateDate(user.BirthDate)
+	valid, birthDate, err := helpers.ValidateDate(user.BirthDate)
 	if !valid {
-		log.Fatal("date is invalid. date format expected for input is (DD-MM-YYYY)")
+		log.Println("Error:", err.Error())
 	}
 
 	// validating password
-	passIsValid := helpers.ValidatePassword(user.Password)
+	passIsValid, err := helpers.ValidatePassword(user.Password)
 	passHashing := ""
 	if passIsValid {
 		// hashing the password
 		passHashing = helpers.HashPass(user.Password)
 	} else {
-		log.Fatal("password should contain lowercase, uppercase, special character, and the length is more than 7")
+		log.Println("Error:", err.Error())
 	}
 
 	// insert new data to database
@@ -60,7 +61,7 @@ func RegisterUser(db *sql.DB, user models.User) (string, error) {
 	return outputStr, nil
 }
 
-func DeleteUser(db *sql.DB, phoneNumber string) string {
+func DeleteAccount(db *sql.DB, phoneNumber string) (string, error) {
 	sqlStatement := `DELETE FROM users WHERE phone=?`
 
 	// prepared statement from the SQL statement before executed
@@ -71,13 +72,21 @@ func DeleteUser(db *sql.DB, phoneNumber string) string {
 
 	result, err := stmt.Exec(phoneNumber)
 	if err != nil {
-		log.Println("Error:", err)
+		return "", fmt.Errorf("error: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		log.Println("Error:", err)
+		return "", fmt.Errorf("error: %v", err)
 	}
 
-	return fmt.Sprintf("User deleted successfully. Rows affected: %d\n", rowsAffected)
+	outputStr := ""
+
+	if rowsAffected == 0 {
+		outputStr = fmt.Sprintln("User not found. Cannot delete account")
+	} else {
+		outputStr = fmt.Sprintf("User deleted successfully. Rows affected: %d\n", rowsAffected)
+	}
+
+	return outputStr, nil
 }
