@@ -11,9 +11,15 @@ import (
 func UserRegister(db *sql.DB, user models.User) (string, error) {
 	sqlStatement := `
 	INSERT INTO users (
-		full_name, single_identity_number, birth_date, address, email, phone, password, balance
+		full_name, identity_number, birth_date, address, email, phone, password, balance
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 	`
+
+	// prepared statement from the SQL statement before executed
+	stmt, err := db.Prepare(sqlStatement)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// validating email format
 	if emailIsValid := helpers.ValidateEmail(user.Email); !emailIsValid {
@@ -37,8 +43,8 @@ func UserRegister(db *sql.DB, user models.User) (string, error) {
 	}
 
 	// insert new data to database
-	result, err := db.Exec(
-		sqlStatement, user.FullName, user.SingleIdentityNumber, birthDate, user.Address,
+	result, err := stmt.Exec(
+		user.FullName, user.IdentityNumber, birthDate, user.Address,
 		user.Email, user.PhoneNumber, passHashing, user.Balance,
 	)
 	if err != nil {
