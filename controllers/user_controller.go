@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func UserRegister(db *sql.DB, user models.User) (string, error) {
+func RegisterUser(db *sql.DB, user models.User) (string, error) {
 	sqlStatement := `
 	INSERT INTO users (
 		full_name, identity_number, birth_date, address, email, phone, password, balance
@@ -58,4 +58,27 @@ func UserRegister(db *sql.DB, user models.User) (string, error) {
 
 	outputStr := fmt.Sprintf("User with ID %d registered successfully.", id)
 	return outputStr, nil
+}
+
+func DeleteUser(db *sql.DB, phoneNumber string) {
+	sqlStatement := `DELETE FROM users WHERE phone=?`
+
+	// prepared statement from the SQL statement before executed
+	stmt, err := db.Prepare(sqlStatement)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := stmt.Exec(phoneNumber)
+	if err != nil {
+		log.Println("Error:", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("Error:", err)
+		return
+	}
+
+	log.Printf("User deleted successfully. Rows affected: %d\n", rowsAffected)
 }
