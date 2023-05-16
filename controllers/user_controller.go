@@ -62,17 +62,17 @@ func RegisterAccount(db *sql.DB, user models.User) (string, error) {
 }
 
 func DeleteAccount(db *sql.DB, phoneNumber, password string) (string, error) {
-	sqlStatement := `DELETE FROM users WHERE phone=?`
+	sqlQuery1 := `DELETE FROM users WHERE phone=?`
 
 	// prepared statement from the SQL statement before executed
-	stmt, err := db.Prepare(sqlStatement)
+	stmt, err := db.Prepare(sqlQuery1)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var storedPassword string
-	query := "SELECT password FROM users WHERE phone = ? LIMIT 1"
-	err = db.QueryRow(query, phoneNumber).Scan(&storedPassword)
+	sqlQuery2 := "SELECT password FROM users WHERE phone = ?"
+	err = db.QueryRow(sqlQuery2, phoneNumber).Scan(&storedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return "", fmt.Errorf("user not found. Cannot delete account")
@@ -100,43 +100,35 @@ func DeleteAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	if rowsAffected == 0 {
 		outputStr = fmt.Sprintln("[FAIL] User not found. Cannot delete account")
 	} else {
-		outputStr = fmt.Sprintf("[SUCCESS] Account deleted successfully. Rows affected: %d\n", rowsAffected)
+		outputStr = fmt.Sprintf("\n[SUCCESS] Account deleted successfully. Rows affected: %d\n", rowsAffected)
 	}
 
 	return outputStr, nil
 }
 
-// proses login
-// mendeklarasikan variabel phone dan pass sebagai parameter fungsi loginAccount
 func LoginAccount(db *sql.DB, phoneNumber, password string) (string, error) {
-
-	//query untuk memeriksa kecocokkan username dan password
-	//mendefinisikan query
-	query := "SELECT id, phone, password FROM users WHERE phone = ? LIMIT 1"
-
-	// prepared statement from the SQL statement before executed
-	stmt, err := db.Prepare(query)
+	var storedPassword string
+	sqlQuery := `SELECT password FROM users WHERE phone = ?`
+	stmt, err := db.Prepare(sqlQuery)
 	if err != nil {
 		log.Fatal(err)
 	}
-	var user models.User
-	//eksekusi pemanggilan query kedatabase
-	err = stmt.QueryRow(phoneNumber).Scan(&user.ID, &user.PhoneNumber, &user.Password)
+
+	err = stmt.QueryRow(phoneNumber).Scan(&storedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("login failed: Invalid phone number")
-		} else {
-			return "", err
+			return "", fmt.Errorf("password not found")
 		}
+		return "", fmt.Errorf("error querying password from database: %v", err)
 	}
-	//mengembalikan objek user yang berhasil ditemukan
-	//compare password dengan hash password
-	err = helpers.ComparePass([]byte(user.Password), []byte(password))
+
+	err = helpers.ComparePass([]byte(storedPassword), []byte(password))
 	if err != nil {
 		return "", fmt.Errorf("login failed: Invalid password")
 	}
 
-	outputStr := fmt.Sprintln("[SUCCESS] Login successful!")
+	outputStr := fmt.Sprintf("\n[SUCCESS] Login successful!\n")
+
 	return outputStr, nil
 }
 
