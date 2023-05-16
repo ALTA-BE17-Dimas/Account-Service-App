@@ -97,7 +97,6 @@ func LoginAccount(db *sql.DB, phonenumber, password string) (string, error) {
 	
 	//query untuk memeriksa kecocokkan username dan password
 	//mendefinisikan query
-	//query:= "SELECT id, phone, password FROM users WHERE phone = ? LIMIT 1"
 	query := "SELECT id, phone, password FROM users WHERE phone = ? LIMIT 1"
 
 	// prepared statement from the SQL statement before executed

@@ -3,13 +3,9 @@ package main
 import (
 	"alta/account-service-app/controllers"
 	"alta/account-service-app/database"
-<<<<<<< HEAD
 	"alta/account-service-app/helpers"
 	"alta/account-service-app/models"
 	"bufio"
-=======
-	//"alta/account-service-app/models"
->>>>>>> f957fdb3a434a9509be64c65d81679135740209a
 	"fmt"
 	"log"
 	"os"
@@ -134,6 +130,22 @@ func main() {
 			} else {
 				fmt.Println(str)
 			}
+		case 2:
+			//Login account
+			var phoneNumber, password string
+			fmt.Print("Phone number: ")
+			fmt.Scanln(&phoneNumber)
+			fmt.Print("Password: ")
+			fmt.Scanln(&password)
+			
+			user, err := controllers.LoginAccount(db, phoneNumber, password)
+			fmt.Print("\nPassword: ")
+			if err != nil {
+				log.Printf("Error: %s\n", err.Error())
+			} else {
+			fmt.Println(user)
+			}
+			
 		case 5:
 			var phoneNumber string
 			fmt.Print("Enter phone number: ")
