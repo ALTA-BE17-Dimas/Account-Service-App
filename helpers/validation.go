@@ -8,8 +8,8 @@ import (
 )
 
 func ValidateDate(dateStr string) (bool, time.Time, error) {
-	birthDateStr := dateStr
-	birthDate, err := time.Parse("02-01-2006", birthDateStr)
+	// parsing and checking if date is in DD-MM-YYYY format
+	birthDate, err := time.Parse("02-01-2006", dateStr)
 	if err != nil {
 		return false, time.Time{}, fmt.Errorf("failed to parse birth date: %s", err.Error())
 	}
