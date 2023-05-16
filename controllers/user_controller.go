@@ -97,12 +97,17 @@ func LoginAccount(db *sql.DB, phonenumber, password string) (string, error) {
 	
 	//query untuk memeriksa kecocokkan username dan password
 	//mendefinisikan query
-	query:= "SELECT id, phone, password FROM users WHERE phone = ? LIMIT 1"
-	
+	//query:= "SELECT id, phone, password FROM users WHERE phone = ? LIMIT 1"
+	query := "SELECT id, phone, password FROM users WHERE phone = ? LIMIT 1"
+
+	// prepared statement from the SQL statement before executed
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		log.Fatal(err)
+	}
 	var user models.User 
 	//eksekusi pemanggilan query kedatabase
-	//
-	err := db.QueryRow(query, phonenumber).Scan(&user.ID, &user.PhoneNumber, &user.Password)
+	err = stmt.QueryRow(phonenumber).Scan(&user.ID, &user.PhoneNumber, &user.Password)
 	if err!= nil {
 		if err == sql.ErrNoRows {
 			return "", fmt.Errorf("login failed: Invalid phone")
