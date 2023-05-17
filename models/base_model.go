@@ -3,7 +3,6 @@ package models
 import "time"
 
 type BaseModel struct {
-	ID        uint
+	ID        string
 	CreatedAt time.Time
-	UpdatedAt time.Time
 }

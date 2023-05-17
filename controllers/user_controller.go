@@ -11,60 +11,58 @@ import (
 func RegisterAccount(db *sql.DB, user models.User) (string, error) {
 	sqlStatement := `
 	INSERT INTO users (
-		full_name, identity_number, birth_date, address, email, phone, password, balance
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+		id, full_name, identity_number, birth_date, address, email, phone, password, balance
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 	`
 
-	// prepared statement from the SQL statement before executed
+	// Prepared statement from the SQL statement before executed
 	stmt, err := db.Prepare(sqlStatement)
 	if err != nil {
 		log.Fatal("Error:", err.Error())
 	}
 
-	// validating email format
+	// Validating email format
 	emailIsValid, err := helpers.ValidateEmail(user.Email)
 	if !emailIsValid {
 		log.Println("Error:", err.Error())
 	}
 
-	// validating birth date format
+	// Validating birth date format
 	valid, birthDate, err := helpers.ValidateDate(user.BirthDate)
 	if !valid {
 		log.Println("Error:", err.Error())
 	}
 
-	// validating password
+	// Validating password
 	passIsValid, err := helpers.ValidatePassword(user.Password)
 	passHashing := ""
 	if passIsValid {
-		// hashing the password
+		// Hashing the password
 		passHashing = helpers.HashPass(user.Password)
 	} else {
 		log.Println("Error:", err.Error())
 	}
 
-	// insert new data to database
-	result, err := stmt.Exec(
-		user.FullName, user.IdentityNumber, birthDate, user.Address,
+	// Generate user ID
+	userID := helpers.GenerateID()
+
+	// Insert new data to database
+	_, err = stmt.Exec(
+		userID, user.FullName, user.IdentityNumber, birthDate, user.Address,
 		user.Email, user.PhoneNumber, passHashing, user.Balance,
 	)
 	if err != nil {
 		return "", fmt.Errorf("add user: %v", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return "", fmt.Errorf("add user: %v", err)
-	}
-
-	outputStr := fmt.Sprintf("\n[SUCCESS] User with ID %d registered successfully.\n\n", id)
+	outputStr := "\n[SUCCESS] Account registered successfully.\n\n"
 	return outputStr, nil
 }
 
 func DeleteAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	sqlQuery1 := `DELETE FROM users WHERE phone=?`
 
-	// prepared statement from the SQL statement before executed
+	// Prepared statement from the SQL statement before executed
 	stmt, err := db.Prepare(sqlQuery1)
 	if err != nil {
 		log.Fatal(err)
@@ -127,14 +125,14 @@ func LoginAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 		return "", fmt.Errorf("login failed: Invalid password")
 	}
 
-	outputStr := fmt.Sprintf("\n[SUCCESS] Login successful!\n")
+	outputStr := "\n[SUCCESS] Login successful!\n"
 
 	return outputStr, nil
 }
 
 func ReadOtherAccount(db *sql.DB, phoneNumber string) (models.User, error) {
 	sqlStatement := `
-		SELECT id, full_name, birth_date, address, email, phone, balance
+		SELECT id, full_name, birth_date, address, email, phone
 		FROM users
 		WHERE phone=?
 	`
@@ -146,7 +144,7 @@ func ReadOtherAccount(db *sql.DB, phoneNumber string) (models.User, error) {
 
 	var user models.User
 	err = stmt.QueryRow(phoneNumber).Scan(
-		&user.ID, &user.FullName, &user.BirthDate, &user.Address, &user.Email, &user.PhoneNumber, &user.Balance,
+		&user.ID, &user.FullName, &user.BirthDate, &user.Address, &user.Email, &user.PhoneNumber,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
