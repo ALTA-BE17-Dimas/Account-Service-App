@@ -3,7 +3,7 @@ CREATE DATABASE `Account_Service_DB`;
 USE `Account_Service_DB`;
 
 CREATE TABLE `Users` (
-    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `id` VARCHAR(10) PRIMARY KEY,
     `full_name` VARCHAR(255) NOT NULL,
     `identity_number` VARCHAR(50) NOT NULL,
     `birth_date` DATE NOT NULL,
@@ -22,11 +22,11 @@ CREATE TABLE `Users` (
 );
 
 CREATE TABLE `Transfer_Histories`(
-    `user_id_sender` INT NOT NULL,
-    `user_id_recipient` INT NOT NULL,
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id_sender` VARCHAR(10) NOT NULL,
+    `user_id_recipient` VARCHAR(10) NOT NULL,
     `amount` DECIMAL NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     CONSTRAINT fk_Transfer_Histories_Users_Sender
         FOREIGN KEY (`user_id_sender`) REFERENCES Users(`id`),
@@ -35,10 +35,10 @@ CREATE TABLE `Transfer_Histories`(
 );
 
 CREATE TABLE `Top_Up_Histories`(
-    `user_id` INT NOT NULL,
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` VARCHAR(10) NOT NULL,
     `amount` DECIMAL NOT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     CONSTRAINT fk_Top_Up_Histories_Users
         FOREIGN KEY (`user_id`) REFERENCES Users(`id`)
