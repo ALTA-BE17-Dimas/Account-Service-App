@@ -106,20 +106,24 @@ func DeleteAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 
 func LoginAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	var storedPassword string
+
+	// Prepare the SQL statement
 	sqlQuery := `SELECT password FROM users WHERE phone = ?`
 	stmt, err := db.Prepare(sqlQuery)
 	if err != nil {
-		log.Fatal(err)
+		return "", fmt.Errorf("failed to prepare SQL statement: %v", err)
 	}
 
+	// Query the password from the database
 	err = stmt.QueryRow(phoneNumber).Scan(&storedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("password not found")
+			return "", fmt.Errorf("invalid phone number")
 		}
 		return "", fmt.Errorf("error querying password from database: %v", err)
 	}
 
+	// Compare the stored password with the provided password
 	err = helpers.ComparePass([]byte(storedPassword), []byte(password))
 	if err != nil {
 		return "", fmt.Errorf("login failed: Invalid password")
@@ -158,8 +162,8 @@ func ReadOtherAccount(db *sql.DB, phoneNumber string) (models.User, error) {
 }
 
 func ReadAccount(db *sql.DB, phoneNumber, password string) (string, error) {
-	sqlStatement := 
-	`SELECT full_name, identity_number, birth_date, address, email, phone, balance, password 
+	sqlStatement :=
+		`SELECT full_name, identity_number, birth_date, address, email, phone, balance, password 
 		FROM users WHERE phone=?`
 
 	// prepared statement from the SQL statement before executed
@@ -172,7 +176,7 @@ func ReadAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	var user models.User
 	err = stmt.QueryRow(phoneNumber).Scan(&user.FullName, &user.IdentityNumber, &user.BirthDate, &user.Address, &user.Email, &user.PhoneNumber, &user.Balance, &user.Password)
 	if err != nil {
-		if err == sql.ErrNoRows{
+		if err == sql.ErrNoRows {
 			return "", fmt.Errorf("User not found")
 		}
 		return "", fmt.Errorf("Error reading account: %v", err)
