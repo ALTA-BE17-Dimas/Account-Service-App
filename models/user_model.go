@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type User struct {
 	BaseModel
 	FullName       string
@@ -10,4 +12,5 @@ type User struct {
 	PhoneNumber    string
 	Password       string
 	Balance        float64
+	UpdatedAt      time.Time
 }
