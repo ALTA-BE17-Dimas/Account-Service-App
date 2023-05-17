@@ -143,25 +143,29 @@ func main() {
 
 			str, err := controllers.LoginAccount(db, phoneNumber, password)
 			if err != nil {
+				fmt.Printf("\n")
 				log.Printf("Error: %s\n", err.Error())
 			} else {
-				fmt.Println(str)
+				fmt.Printf("\n")
+				fmt.Printf("%s\n", str)
 			}
-      
+
 		case 3:
 			//read account
 			fmt.Print("Enter phone number: ")
 			fmt.Scanln(&phoneNumber)
 			fmt.Print("Enter password: ")
 			fmt.Scanln(&password)
-		
+
 			user, err := controllers.ReadAccount(db, phoneNumber, password)
 			fmt.Print("\n")
 			if err != nil {
+				fmt.Printf("\n")
 				log.Printf("Error: %s\n", err.Error())
 			} else {
-			fmt.Println(user)
-			}	
+				fmt.Printf("\n")
+				fmt.Printf("%s\n", user)
+			}
 
 		case 5:
 			if (phoneNumber == "") || (password == "") {
