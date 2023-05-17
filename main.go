@@ -27,12 +27,12 @@ func main() {
 	Menu:
 
 	[1].	Register New Account
-	[2].	Login
+	[2].	Login Account
 	[3].	Read Account
 	[4].	Update Account
 	[5].	Delete Account
-	[6].	Top-Up
-	[7].	Transfer
+	[6].	Top-Up Account
+	[7].	Transfer Account
 	[8].	Display Top-Up History
 	[9].	Display Transfer History
 	[10].	Read Other Account
@@ -51,7 +51,7 @@ func main() {
 		switch option {
 		case 1:
 			// create new user
-			newUser := models.User{Balance: 0}
+			newUser := models.User{Balance: 1000}
 
 			fmt.Println("\nEnter the data below:")
 
@@ -176,7 +176,25 @@ func main() {
 					fmt.Printf("%s\n", str)
 				}
 			}
-
+		case 7:
+			if (phoneNumber == "") || (password == "") {
+				fmt.Printf("\nYou have to login first!\n")
+			} else {
+				var phoneNumberRecipient string
+				var transferAmount float64
+				fmt.Print("\nEnter recipient's phone number: ")
+				fmt.Scanln(&phoneNumberRecipient)
+				fmt.Print("\nEnter transfer amount: ")
+				fmt.Scanln(&transferAmount)
+				str, err := controllers.Transfer(db, phoneNumber, phoneNumberRecipient, transferAmount)
+				if err != nil {
+					fmt.Printf("\n")
+					log.Printf("Error: %s\n", err.Error())
+				} else {
+					fmt.Printf("\n")
+					fmt.Printf("%s\n", str)
+				}
+			}
 		case 10:
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
@@ -192,13 +210,12 @@ func main() {
 					fmt.Println("-----------------------------------------")
 					fmt.Printf("User Information\n")
 					fmt.Println("-----------------------------------------")
-					fmt.Printf("ID\t\t: %d\n", otherAccount.ID)
+					fmt.Printf("ID\t\t: %s\n", otherAccount.ID)
 					fmt.Printf("Full Name\t: %s\n", otherAccount.FullName)
 					fmt.Printf("Birth Date\t: %s\n", otherAccount.BirthDate)
 					fmt.Printf("Address\t\t: %s\n", otherAccount.Address)
 					fmt.Printf("Email\t\t: %s\n", otherAccount.Email)
 					fmt.Printf("Phone Number\t: %s\n", otherAccount.PhoneNumber)
-					fmt.Printf("Balance\t\t: %.2f\n", otherAccount.Balance)
 					fmt.Println("-----------------------------------------")
 				}
 			}
