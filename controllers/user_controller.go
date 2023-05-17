@@ -57,17 +57,32 @@ func RegisterAccount(db *sql.DB, user models.User) (string, error) {
 		return "", fmt.Errorf("add user: %v", err)
 	}
 
-	outputStr := fmt.Sprintf("User with ID %d registered successfully.", id)
+	outputStr := fmt.Sprintf("\n[SUCCESS] User with ID %d registered successfully.\n\n", id)
 	return outputStr, nil
 }
 
-func DeleteAccount(db *sql.DB, phoneNumber string) (string, error) {
-	sqlStatement := `DELETE FROM users WHERE phone=?`
+func DeleteAccount(db *sql.DB, phoneNumber, password string) (string, error) {
+	sqlQuery1 := `DELETE FROM users WHERE phone=?`
 
 	// prepared statement from the SQL statement before executed
-	stmt, err := db.Prepare(sqlStatement)
+	stmt, err := db.Prepare(sqlQuery1)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	var storedPassword string
+	sqlQuery2 := `SELECT password FROM users WHERE phone = ?`
+	err = db.QueryRow(sqlQuery2, phoneNumber).Scan(&storedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", fmt.Errorf("user not found. Cannot delete account")
+		}
+		return "", fmt.Errorf("error querying password from database: %v", err)
+	}
+
+	err = helpers.ComparePass([]byte(storedPassword), []byte(password))
+	if err != nil {
+		return "", fmt.Errorf("invalid password. Cannot delete account")
 	}
 
 	result, err := stmt.Exec(phoneNumber)
@@ -83,47 +98,65 @@ func DeleteAccount(db *sql.DB, phoneNumber string) (string, error) {
 	outputStr := ""
 
 	if rowsAffected == 0 {
-		outputStr = fmt.Sprintln("User not found. Cannot delete account")
+		outputStr = fmt.Sprintln("[FAIL] User not found. Cannot delete account")
 	} else {
-		outputStr = fmt.Sprintf("Account deleted successfully. Rows affected: %d\n", rowsAffected)
+		outputStr = fmt.Sprintf("\n[SUCCESS] Account deleted successfully. Rows affected: %d\n", rowsAffected)
 	}
 
 	return outputStr, nil
 }
 
-//proses login
-//mendeklarasikan variabel phone dan pass sebagai parameter fungsi loginAccount
 func LoginAccount(db *sql.DB, phoneNumber, password string) (string, error) {
-	
-	//query untuk memeriksa kecocokkan username dan password
-	//mendefinisikan query
-	query := "SELECT id, phone, password FROM users WHERE phone = ? LIMIT 1"
-
-	// prepared statement from the SQL statement before executed
-	stmt, err := db.Prepare(query)
+	var storedPassword string
+	sqlQuery := `SELECT password FROM users WHERE phone = ?`
+	stmt, err := db.Prepare(sqlQuery)
 	if err != nil {
 		log.Fatal(err)
 	}
-	var user models.User 
-	//eksekusi pemanggilan query kedatabase
-	err = stmt.QueryRow(phoneNumber).Scan(&user.ID, &user.PhoneNumber, &user.Password)
-	if err!= nil {
+
+	err = stmt.QueryRow(phoneNumber).Scan(&storedPassword)
+	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("login failed: Invalid phone number")
-		} else {
-			return "", err
+			return "", fmt.Errorf("password not found")
 		}
+		return "", fmt.Errorf("error querying password from database: %v", err)
 	}
-	//mengembalikan objek user yang berhasil ditemukan
-	//compare password dengan hash password
-	err = helpers.ComparePass([]byte(user.Password), []byte(password))
+
+	err = helpers.ComparePass([]byte(storedPassword), []byte(password))
 	if err != nil {
 		return "", fmt.Errorf("login failed: Invalid password")
 	}
 
-	outputStr := fmt.Sprint("Login successful!")
+	outputStr := fmt.Sprintf("\n[SUCCESS] Login successful!\n")
+
 	return outputStr, nil
-	
+}
+
+func ReadOtherAccount(db *sql.DB, phoneNumber string) (models.User, error) {
+	sqlStatement := `
+		SELECT id, full_name, birth_date, address, email, phone, balance
+		FROM users
+		WHERE phone=?
+	`
+
+	stmt, err := db.Prepare(sqlStatement)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var user models.User
+	err = stmt.QueryRow(phoneNumber).Scan(
+		&user.ID, &user.FullName, &user.BirthDate, &user.Address, &user.Email, &user.PhoneNumber, &user.Balance,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return models.User{}, fmt.Errorf("user's account not found")
+		}
+		return models.User{}, fmt.Errorf("error querying user's account: %v", err)
+	}
+
+	fmt.Printf("\n[SUCCESS] Account is found.\n\n")
+	return user, nil
 }
 
 func ReadAccount(db *sql.DB, phoneNumber, password string) (string, error) {
