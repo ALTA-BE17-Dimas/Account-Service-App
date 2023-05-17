@@ -147,6 +147,22 @@ func main() {
 			} else {
 				fmt.Println(str)
 			}
+      
+		case 3:
+			//read account
+			fmt.Print("Enter phone number: ")
+			fmt.Scanln(&phoneNumber)
+			fmt.Print("Enter password: ")
+			fmt.Scanln(&password)
+		
+			user, err := controllers.ReadAccount(db, phoneNumber, password)
+			fmt.Print("\n")
+			if err != nil {
+				log.Printf("Error: %s\n", err.Error())
+			} else {
+			fmt.Println(user)
+			}	
+
 		case 5:
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
