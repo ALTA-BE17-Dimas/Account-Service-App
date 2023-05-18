@@ -296,6 +296,7 @@ firstOuter:
 								log.Println("Error:", err.Error())
 							}
 						}
+
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Email", "email", newValue)
 						if err != nil {
 							log.Printf("Error: %s\n", err.Error())
@@ -323,6 +324,7 @@ firstOuter:
 								log.Println("Error:", err.Error())
 							}
 						}
+
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Phone number", "phone", newValue)
 						if err != nil {
 							log.Printf("Error: %s\n", err.Error())
@@ -354,6 +356,7 @@ firstOuter:
 								log.Println("Error:", err.Error())
 							}
 						}
+
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Password", "password", passHashing)
 						if err != nil {
 							log.Printf("Error: %s\n", err.Error())
@@ -443,7 +446,8 @@ firstOuter:
 					fmt.Println("--------------------------------")
 				}
 			}
-		case 9:
+
+		case 9: // Display transfer history user account
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
@@ -474,6 +478,7 @@ firstOuter:
 							fmt.Printf("%+v\n", value)
 						}
 						fmt.Println("Count:", transferCounter)
+
 					case 2:
 						histories := controllers.DisplayTransferHistory(db, "recipient", phoneNumber)
 						fmt.Printf("\n")
@@ -486,6 +491,7 @@ firstOuter:
 							fmt.Printf("%+v\n", value)
 						}
 						fmt.Println("Count:", transferCounter)
+
 					case 3:
 						tfHistoryLoop = false
 					}
