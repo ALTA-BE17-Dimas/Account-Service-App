@@ -1,9 +1,9 @@
 package models
-import "time"
+// import "time"
 
 type TopUpHistory struct {
 	BaseModel
 	UserID 		uint
 	Amount 		float64
-	CreatedAt 	time.Time
+	// CreatedAt 	time.Time
 }

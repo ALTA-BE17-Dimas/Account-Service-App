@@ -220,7 +220,7 @@ func main() {
 			//display top-up history
 			fmt.Print("\nEnter phone number: ")
 			fmt.Scanln(&phoneNumber)
-			histories, err := controllers.GetTopupHistories(db, phoneNumber)
+			histories, err := controllers.DisplayTopupHistories(db, phoneNumber)
 			if err != nil {
 				log.Fatal(err)
 			}
