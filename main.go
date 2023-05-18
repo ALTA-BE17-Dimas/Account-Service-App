@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
@@ -167,7 +168,180 @@ func main() {
 					fmt.Printf("\n%s\n", user)
 				}
 			}
+		case 4:
+			if (phoneNumber == "") || (password == "") {
+				fmt.Printf("\nYou have to login first!\n")
+			} else {
+				updateMenu := `
+				Select the section you want to update:
 
+				[1].	Full Name
+				[2].	Birth Date
+				[3].	Address
+				[4].	Email
+				[5].	Phone Number
+				[6].	Password
+				[7].	Finish Update
+				`
+
+				updateLoop := true
+			outer:
+				for updateLoop {
+					fmt.Println(updateMenu)
+					fmt.Print("\nEnter update menu option: ")
+					var option int
+					fmt.Scanln(&option)
+
+					switch option {
+					case 1:
+						fmt.Println("\nPress (x) to go back")
+						fmt.Print("\nEnter new full name\t: ")
+						var newValue string
+						newValue, err = helpers.ReadLine()
+						checkError(err)
+
+						if newValue == "x" {
+							continue outer
+						}
+
+						str, err := controllers.UpdateAccount(db, phoneNumber, "Full name", "full_name", newValue)
+						if err != nil {
+							log.Printf("Error: %s\n", err.Error())
+						} else {
+							fmt.Printf("\n%s\n", str)
+						}
+					case 2:
+						var newValue string
+						var newBirthDate time.Time
+						birthDateUpdateLoop := true
+						for birthDateUpdateLoop {
+							fmt.Println("\nPress (x) to go back")
+							fmt.Print("\nEnter new birth date\t: ")
+							_, err = fmt.Scanln(&newValue)
+							checkError(err)
+
+							if newValue == "x" {
+								continue outer
+							}
+
+							birthDateIsValid, birthDate, err := helpers.ValidateDate(newValue)
+							if birthDateIsValid {
+								newBirthDate = birthDate
+								birthDateUpdateLoop = false
+							} else {
+								log.Println("Error:", err.Error())
+							}
+						}
+
+						str, err := controllers.UpdateAccount(db, phoneNumber, "Birth date", "birth_date", newBirthDate)
+						if err != nil {
+							log.Printf("Error: %s\n", err.Error())
+						} else {
+							fmt.Printf("\n%s\n", str)
+						}
+					case 3:
+						fmt.Println("\nPress (x) to go back")
+						fmt.Print("\nEnter new address\t: ")
+						var newValue string
+						newValue, err = helpers.ReadLine()
+						checkError(err)
+
+						if newValue == "x" {
+							continue outer
+						}
+
+						str, err := controllers.UpdateAccount(db, phoneNumber, "Address", "address", newValue)
+						if err != nil {
+							log.Printf("Error: %s\n", err.Error())
+						} else {
+							fmt.Printf("\n%s\n", str)
+						}
+					case 4:
+						var newValue string
+						mailUpdateLoop := true
+						for mailUpdateLoop {
+							fmt.Println("\nPress (x) to go back")
+							fmt.Print("\nEnter new email\t: ")
+							_, err = fmt.Scanln(&newValue)
+							checkError(err)
+
+							if newValue == "x" {
+								continue outer
+							}
+
+							emailIsValid, err := helpers.ValidateEmail(newValue)
+							if emailIsValid {
+								mailUpdateLoop = false
+							} else {
+								log.Println("Error:", err.Error())
+							}
+						}
+						str, err := controllers.UpdateAccount(db, phoneNumber, "Email", "email", newValue)
+						if err != nil {
+							log.Printf("Error: %s\n", err.Error())
+						} else {
+							fmt.Printf("\n%s\n", str)
+						}
+					case 5:
+						var newValue string
+						phoneNumberUpdateLoop := true
+						for phoneNumberUpdateLoop {
+							fmt.Println("\nPress (x) to go back")
+							fmt.Print("\nEnter new phone number\t: ")
+							_, err = fmt.Scanln(&newValue)
+							checkError(err)
+
+							if newValue == "x" {
+								continue outer
+							}
+
+							isPhoneNumberValid, err := helpers.ValidatePhoneNumber(newValue)
+							if isPhoneNumberValid {
+								phoneNumberUpdateLoop = false
+							} else {
+								log.Println("Error:", err.Error())
+							}
+						}
+						str, err := controllers.UpdateAccount(db, phoneNumber, "Phone number", "phone", newValue)
+						if err != nil {
+							log.Printf("Error: %s\n", err.Error())
+						} else {
+							fmt.Printf("\n%s\n", str)
+						}
+					case 6:
+						var newValue string
+						passHashing := ""
+						passUpdateLoop := true
+						for passUpdateLoop {
+							fmt.Println("\nPress (x) to go back")
+							fmt.Print("\nEnter new password\t: ")
+							_, err = fmt.Scanln(&newValue)
+							checkError(err)
+
+							if newValue == "x" {
+								continue outer
+							}
+
+							isPassValid, err := helpers.ValidatePassword(newValue)
+							if isPassValid {
+								passHashing = helpers.HashPass(newValue)
+								passUpdateLoop = false
+							} else {
+								log.Println("Error:", err.Error())
+							}
+						}
+						str, err := controllers.UpdateAccount(db, phoneNumber, "Password", "password", passHashing)
+						if err != nil {
+							log.Printf("Error: %s\n", err.Error())
+						} else {
+							fmt.Printf("\n%s\n", str)
+						}
+					case 7:
+						updateLoop = false
+						fmt.Printf("\nUpdate complete.\n")
+					}
+				}
+			}
 		case 5:
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
