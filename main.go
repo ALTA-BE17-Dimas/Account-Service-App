@@ -224,15 +224,20 @@ func main() {
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
-				var phoneNumber string
+				var otherPhoneNumber string
 				fmt.Print("\nEnter other user's phone number\t: ")
-				fmt.Scanln(&phoneNumber)
-				str, err := controllers.ReadOtherAccount(db, phoneNumber)
-				if err != nil {
+				fmt.Scanln(&otherPhoneNumber)
+				if otherPhoneNumber == phoneNumber {
 					fmt.Println("")
-					log.Printf("Error: %s\n", err.Error())
+					log.Printf("Choose option 3 to see your account information")
 				} else {
-					fmt.Printf("\n%s\n", str)
+					str, err := controllers.ReadOtherAccount(db, otherPhoneNumber)
+					if err != nil {
+						fmt.Println("")
+						log.Printf("Error: %s\n", err.Error())
+					} else {
+						fmt.Printf("\n%s\n", str)
+					}
 				}
 			}
 		case 11:
