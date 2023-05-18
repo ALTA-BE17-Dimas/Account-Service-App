@@ -5,11 +5,9 @@ import (
 	"alta/account-service-app/database"
 	"alta/account-service-app/helpers"
 	"alta/account-service-app/models"
-	"bufio"
 	"fmt"
 	"log"
 	"os"
-	"strings"
 )
 
 func main() {
@@ -55,13 +53,13 @@ func main() {
 				fmt.Printf("\nYou have to log out first!\n")
 			} else {
 				// create new user
-				newUser := models.User{Balance: 1000}
+				newUser := models.User{Balance: 0}
 
 				fmt.Println("\nEnter the data below:")
 
 				// Entering Full Name
 				fmt.Print("\nFull Name\t: ")
-				newUser.FullName, err = ReadLine()
+				newUser.FullName, err = helpers.ReadLine()
 				checkError(err)
 
 				// Entering Identity Number
@@ -71,7 +69,7 @@ func main() {
 
 				// Entering Address
 				fmt.Print("\nAddress\t\t: ")
-				newUser.Address, err = ReadLine()
+				newUser.Address, err = helpers.ReadLine()
 				checkError(err)
 
 				// Entering Birth Date
@@ -254,15 +252,4 @@ func checkError(err error) {
 	if err != nil {
 		log.Printf("Error: %s\n", err.Error())
 	}
-}
-
-func ReadLine() (string, error) {
-	reader := bufio.NewReader(os.Stdin)
-	str, err := reader.ReadString('\n')
-	if err != nil {
-		return "", err
-	}
-
-	str = strings.TrimSuffix(str, "\n")
-	return str, nil
 }
