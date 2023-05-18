@@ -102,13 +102,6 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	return outputStr, nil
 }
 
-type history struct {
-	id          uint
-	phoneNumber string
-	amount      float64
-	createdAt   time.Time
-}
-
 func DisplayTransferHistory(db *sql.DB, role, phoneSender string) []models.TransferHistory {
 	sqlQuery := ""
 
