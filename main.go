@@ -152,18 +152,24 @@ firstOuter:
 			}
 
 		case 2: // Login user account
-			fmt.Print("\nEnter phone number: ")
-			fmt.Scanln(&phoneNumber)
-			fmt.Print("\nEnter password: ")
-			fmt.Scanln(&password)
-
-			str, err := controllers.LoginAccount(db, phoneNumber, password)
-			if err != nil {
-				fmt.Println("")
-				log.Printf("[FAIL] %s\n", err.Error())
+			if (phoneNumber != "") || (password != "") {
+				fmt.Printf("\nYou have to log out first!\n")
 			} else {
-				fmt.Println("")
-				log.Printf("%s\n", str)
+
+				fmt.Print("\nEnter phone number: ")
+				fmt.Scanln(&phoneNumber)
+				fmt.Print("\nEnter password: ")
+				fmt.Scanln(&password)
+
+				str, err := controllers.LoginAccount(db, phoneNumber, password)
+				if err != nil {
+					_ = controllers.LogOutAccount(&phoneNumber, &password)
+					fmt.Println("")
+					log.Printf("[FAIL] %s\n", err.Error())
+				} else {
+					fmt.Println("")
+					log.Printf("%s\n", str)
+				}
 			}
 
 		case 3: // Read user account
