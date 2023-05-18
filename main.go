@@ -45,6 +45,14 @@ func main() {
 	loop := true
 	for loop {
 		fmt.Println(menu)
+
+		if (phoneNumber == "") || (password == "") {
+			fmt.Printf("\nYou are not login yet!\n")
+		} else {
+			id, name := controllers.GetAccountInfo(db, phoneNumber)
+			fmt.Printf("\nYou are login as (%s - %s)\n", id, name)
+		}
+
 		fmt.Print("\nEnter menu option: ")
 		var option int
 		fmt.Scanln(&option)
@@ -55,7 +63,7 @@ func main() {
 				fmt.Printf("\nYou have to log out first!\n")
 			} else {
 				// create new user
-				newUser := models.User{Balance: 0}
+				newUser := models.User{Balance: 1000}
 
 				fmt.Println("\nEnter the data below:")
 
