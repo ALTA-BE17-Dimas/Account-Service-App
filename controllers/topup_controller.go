@@ -50,7 +50,7 @@ func Topup(db *sql.DB, phoneNumber string, amount float64) (string, error) {
 	sqlQuery3 := `SELECT id FROM users WHERE phone = ?`
 	stmt, err = transaction.Prepare(sqlQuery3)
 	checkErrorPrepare(err)
-	defer stmt.Close()
+    defer stmt.Close()
 	
 	var userID string
 	err = stmt.QueryRow(phoneNumber).Scan(&userID)
@@ -90,10 +90,11 @@ func DisplayTopupHistories(db *sql.DB, phoneNumber string) ([]models.TopUpHistor
 		WHERE u.phone = ?
 		ORDER BY th.created_at DESC
 	`
-	stmt, err := db.Prepare(sqlQuery)
+
+  stmt, err := db.Prepare(sqlQuery)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare SQL query: %v", err)
-	}
+}
 	defer stmt.Close()
 
 	rows, err := stmt.Query(phoneNumber)
@@ -122,6 +123,7 @@ func DisplayTopupHistories(db *sql.DB, phoneNumber string) ([]models.TopUpHistor
 	}
 
 	if err = rows.Err(); err != nil {
+
 		return nil, fmt.Errorf("failed to prepare insert statement: %v", err)
 	}
 

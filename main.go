@@ -181,7 +181,6 @@ func main() {
 					log.Printf("%s", str)
 				}
 			}
-
 		
 		case 6:
 			//topup
@@ -194,6 +193,7 @@ func main() {
 				fmt.Print("\nEnter top amount: ")
 				fmt.Scanln(&topupAmount)
 				str, err := controllers.Topup(db, phoneNumber, topupAmount)
+
 				if err != nil {
 					fmt.Printf("\n")
 					log.Printf("Error: %s\n", err.Error())
@@ -202,7 +202,7 @@ func main() {
 					fmt.Printf("%s\n", str)
 				}
 			}
-			
+		
 		case 7:
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
@@ -223,25 +223,8 @@ func main() {
 				}
 			}
 
-		case 9:
-			if (phoneNumber == "") || (password == "") {
-				fmt.Printf("\nYou have to login first!\n")
-			} else {
-				histories := controllers.DisplayTransferHistory(db, phoneNumber)
-				fmt.Printf("\n")
-				fmt.Println("-----------------------------------------")
-				fmt.Printf("Your Transfer History: \n")
-				fmt.Println("-----------------------------------------")
-				transferCounter := 0
-				for _, value := range histories {
-					transferCounter++
-					fmt.Printf("%+v\n", value)
-				}
-				fmt.Println("Count:", transferCounter)
-			}
-
 		case 8:
-			//display top-up history
+		//display top-up history
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
@@ -260,6 +243,22 @@ func main() {
 					fmt.Printf("Time\t\t: %s\n", history.CreatedAt.Format("2006-01-02 15:04:05"))
 					fmt.Println("--------------------------------")
 				}
+			}
+		case 9:
+			if (phoneNumber == "") || (password == "") {
+				fmt.Printf("\nYou have to login first!\n")
+			} else {
+				histories := controllers.DisplayTransferHistory(db, phoneNumber)
+				fmt.Printf("\n")
+				fmt.Println("-----------------------------------------")
+				fmt.Printf("Your Transfer History: \n")
+				fmt.Println("-----------------------------------------")
+				transferCounter := 0
+				for _, value := range histories {
+					transferCounter++
+					fmt.Printf("%+v\n", value)
+				}
+				fmt.Println("Count:", transferCounter)
 			}
 
 		case 10:
