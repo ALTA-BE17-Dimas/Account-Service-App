@@ -38,6 +38,7 @@ func main() {
 	[12].	Exit
 	---------------------------------
 	`
+
 	var phoneNumber, password string
 
 	loop := true
