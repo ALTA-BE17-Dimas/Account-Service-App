@@ -388,17 +388,51 @@ func main() {
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
-				histories := controllers.DisplayTransferHistory(db, phoneNumber)
-				fmt.Printf("\n")
-				fmt.Println("-----------------------------------------")
-				fmt.Printf("Your Transfer History: \n")
-				fmt.Println("-----------------------------------------")
-				transferCounter := 0
-				for _, value := range histories {
-					transferCounter++
-					fmt.Printf("%+v\n", value)
+				tfHistory := `
+				Display transfer history as:
+
+				[1].	Sender
+				[2].	Recipient
+				[3].	Exit
+				`
+				tfHistoryLoop := true
+				for tfHistoryLoop {
+					fmt.Println(tfHistory)
+					fmt.Print("\nEnter transfer history option: ")
+					var option int
+					fmt.Scanln(&option)
+
+					switch option {
+					case 1:
+						histories := controllers.DisplayTransferHistory(db, "sender", phoneNumber)
+						fmt.Printf("\n")
+						fmt.Println("-----------------------------------------")
+						fmt.Printf("Your transfer history as sender: \n")
+						fmt.Println("-----------------------------------------")
+						transferCounter := 0
+						for _, value := range histories {
+							transferCounter++
+							fmt.Printf("%+v\n", value)
+						}
+						fmt.Println("Count:", transferCounter)
+					case 2:
+						histories := controllers.DisplayTransferHistory(db, "recipient", phoneNumber)
+						fmt.Printf("\n")
+						fmt.Println("-----------------------------------------")
+						fmt.Printf("Your transfer history as recipient: \n")
+						fmt.Println("-----------------------------------------")
+						transferCounter := 0
+						for _, value := range histories {
+							transferCounter++
+							fmt.Printf("%+v\n", value)
+						}
+						fmt.Println("Count:", transferCounter)
+					case 3:
+						tfHistoryLoop = false
+					}
+
 				}
-				fmt.Println("Count:", transferCounter)
+
 			}
 
 		case 10:
