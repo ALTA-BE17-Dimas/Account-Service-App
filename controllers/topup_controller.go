@@ -39,6 +39,7 @@ func Topup(db *sql.DB, phoneNumber string, amount float64) (string, error) {
 	sqlQuery2 := `UPDATE users SET balance = balance + ? WHERE phone = ?`
 	stmt, err = transaction.Prepare(sqlQuery2)
 	checkErrorPrepare(err)
+	defer stmt.Close()
 		
 	_, err = stmt.Exec(amount, phoneNumber)
 	if err != nil {
@@ -49,6 +50,7 @@ func Topup(db *sql.DB, phoneNumber string, amount float64) (string, error) {
 	sqlQuery3 := `SELECT id FROM users WHERE phone = ?`
 	stmt, err = transaction.Prepare(sqlQuery3)
 	checkErrorPrepare(err)
+	defer stmt.Close()
 	
 	var userID string
 	err = stmt.QueryRow(phoneNumber).Scan(&userID)
@@ -63,7 +65,8 @@ func Topup(db *sql.DB, phoneNumber string, amount float64) (string, error) {
 	sqlQuery4 := `INSERT INTO top_up_histories (user_id, amount, created_at) VALUES (?, ?, NOW())`
 	stmt, err = transaction.Prepare(sqlQuery4)
 	checkErrorPrepare(err)
-
+	defer stmt.Close()
+	
 	_, err = stmt.Exec(userID, amount)
 	if err != nil {
 		return "", fmt.Errorf("failed to insert transfer history: %v", err)
