@@ -65,7 +65,7 @@ firstOuter:
 				fmt.Printf("\nYou have to log out first!\n")
 			} else {
 				// create new user
-				newUser := models.User{Balance: 1000}
+				newUser := models.User{Balance: 0}
 
 				fmt.Println("\nEnter the data below:")
 
@@ -155,7 +155,6 @@ firstOuter:
 			if (phoneNumber != "") || (password != "") {
 				fmt.Printf("\nYou have to log out first!\n")
 			} else {
-
 				fmt.Print("\nEnter phone number: ")
 				fmt.Scanln(&phoneNumber)
 				fmt.Print("\nEnter password: ")
@@ -431,20 +430,21 @@ firstOuter:
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
 				histories, err := controllers.DisplayTopupHistories(db, phoneNumber)
-				if err != nil {
-					log.Fatal(err)
-				}
+				checkError(err)
+				fmt.Printf("\n")
+				fmt.Println("-----------------------------------------")
+				fmt.Printf("Your top-up history: \n")
+				fmt.Println("-----------------------------------------")
+				topupCounter := 0
 				// Print top-up histories
 				for _, history := range histories {
-					fmt.Printf("\n")
-					fmt.Println("--------------------------------")
-					fmt.Printf("Your Topup History: \n")
-					fmt.Println("--------------------------------")
-					fmt.Printf("ID\t\t: %d\n", history.ID)
-					fmt.Printf("Amount\t\t: %.2f\n", history.Amount)
-					fmt.Printf("Time\t\t: %s\n", history.CreatedAt.Format("2006-01-02 15:04:05"))
-					fmt.Println("--------------------------------")
+					topupCounter++
+					fmt.Printf("User ID\t: %s\n", history.UserID)
+					fmt.Printf("Amount\t: %.2f\n", history.Amount)
+					fmt.Printf("Time\t: %s\n", history.CreatedAt.Format("2006-01-02 15:04:05"))
+					fmt.Println("-----------------------------------------")
 				}
+				fmt.Println("Count:", topupCounter)
 			}
 
 		case 9: // Display transfer history user account
@@ -476,7 +476,10 @@ firstOuter:
 						transferCounter := 0
 						for _, value := range histories {
 							transferCounter++
-							fmt.Printf("%+v\n", value)
+							fmt.Printf(
+								"transfer_id: %s, phone_recipient: %s, amount: %.2f, transaction_time: %s\n",
+								value.ID, value.PhoneNumber, value.Amount, value.CreatedAt.Format("2006-01-02 15:04:05"),
+							)
 						}
 						fmt.Println("Count:", transferCounter)
 
@@ -490,7 +493,10 @@ firstOuter:
 						transferCounter := 0
 						for _, value := range histories {
 							transferCounter++
-							fmt.Printf("%+v\n", value)
+							fmt.Printf(
+								"transfer_id: %s, phone_sender: %s, amount: %.2f, transaction_time: %s\n",
+								value.ID, value.PhoneNumber, value.Amount, value.CreatedAt.Format("2006-01-02 15:04:05"),
+							)
 						}
 						fmt.Println("Count:", transferCounter)
 
