@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"alta/account-service-app/models"
 	"database/sql"
 	"fmt"
+	"log"
+	"time"
 )
 
 func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (string, error) {
@@ -18,9 +21,7 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	// Query the sender's balance
 	sqlQuery1 := `SELECT balance FROM users WHERE phone = ?`
 	stmt, err := tx.Prepare(sqlQuery1)
-	if err != nil {
-		return "", fmt.Errorf("failed to prepare query: %v", err)
-	}
+	checkErrorPrepare(err)
 	defer stmt.Close()
 
 	// Confirm that sender's balance is enough for making transfer
@@ -42,10 +43,7 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	// Update the sender's balance
 	sqlQuery2 := `UPDATE users SET balance = balance - ? WHERE phone = ?`
 	stmt, err = tx.Prepare(sqlQuery2)
-	if err != nil {
-		return "", fmt.Errorf("failed to prepare update statement: %v", err)
-	}
-	defer stmt.Close()
+	checkErrorPrepare(err)
 
 	_, err = stmt.Exec(amount, phoneSender)
 	if err != nil {
@@ -55,13 +53,9 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	// Select user id for sender and recipient
 	sqlQuery3 := `SELECT id FROM users WHERE phone = ?`
 	stmt, err = tx.Prepare(sqlQuery3)
-	if err != nil {
-		return "", fmt.Errorf("failed to prepare query: %v", err)
-	}
-	defer stmt.Close()
+	checkErrorPrepare(err)
 
 	var senderID string
-	var recipientID string
 	err = stmt.QueryRow(phoneSender).Scan(&senderID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -69,6 +63,8 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 		}
 		return "", fmt.Errorf("error querying sender's account: %v", err)
 	}
+
+	var recipientID string
 	err = stmt.QueryRow(phoneRecipient).Scan(&recipientID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -80,10 +76,7 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	// Update the recipient's balance
 	sqlQuery4 := `UPDATE users SET balance = balance + ? WHERE phone = ?`
 	stmt, err = tx.Prepare(sqlQuery4)
-	if err != nil {
-		return "", fmt.Errorf("failed to prepare update statement: %v", err)
-	}
-	defer stmt.Close()
+	checkErrorPrepare(err)
 
 	_, err = stmt.Exec(amount, phoneRecipient)
 	if err != nil {
@@ -93,10 +86,7 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	// Insert a new row in the transfer_histories table
 	sqlQuery5 := `INSERT INTO transfer_histories (user_id_sender, user_id_recipient, amount) VALUES (?, ?, ?)`
 	stmt, err = tx.Prepare(sqlQuery5)
-	if err != nil {
-		return "", fmt.Errorf("failed to prepare insert statement: %v", err)
-	}
-	defer stmt.Close()
+	checkErrorPrepare(err)
 
 	_, err = stmt.Exec(senderID, recipientID, amount)
 	if err != nil {
@@ -108,6 +98,55 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 		return "", fmt.Errorf("failed to commit transaction: %v", err)
 	}
 
-	outputStr := "\n[SUCCESS] Transfer was successful.\n"
+	outputStr := "[SUCCESS] Transfer was successful.\n"
 	return outputStr, nil
+}
+
+func DisplayTransferHistory(db *sql.DB, phoneSender string) []models.TransferHistory {
+	sqlQuery := `
+		SELECT th.id, th.user_id_sender, th.user_id_recipient, th.amount, th.created_at
+		FROM transfer_histories th
+		INNER JOIN users u ON th.user_id_sender = u.id
+		WHERE u.phone = ?
+	`
+
+	stmt, err := db.Prepare(sqlQuery)
+	if err != nil {
+		log.Fatalf("failed to prepare SQL statement: %v", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(phoneSender)
+	if err != nil {
+		log.Fatalf("failed to query transfer histories: %v", err)
+	}
+	defer rows.Close()
+
+	var histories []models.TransferHistory
+	for rows.Next() {
+		var history models.TransferHistory
+		var createdAt []uint8 // Use []byte to store the raw value
+
+		err := rows.Scan(&history.ID, &history.UserIDSender, &history.UserIDRecipient, &history.Amount, &createdAt)
+		if err != nil {
+			log.Printf("failed to scan transfer history: %v", err)
+			continue
+		}
+		// Parse the createdAt value into a time.Time variable
+		createdAtStr := string(createdAt)
+		history.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
+		if err != nil {
+			log.Printf("failed to parse created_at value: %v", err)
+			continue
+		}
+		histories = append(histories, history)
+	}
+	return histories
+}
+
+func checkErrorPrepare(err error) error {
+	if err != nil {
+		return fmt.Errorf("failed to prepare insert statement: %v", err)
+	}
+	return nil
 }

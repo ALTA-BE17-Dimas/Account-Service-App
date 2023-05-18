@@ -3,7 +3,7 @@ package models
 import "time"
 
 type User struct {
-	BaseModel
+	ID             string
 	FullName       string
 	IdentityNumber string
 	BirthDate      string
@@ -12,5 +12,6 @@ type User struct {
 	PhoneNumber    string
 	Password       string
 	Balance        float64
+	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }
