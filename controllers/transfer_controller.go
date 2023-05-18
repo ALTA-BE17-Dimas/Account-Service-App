@@ -86,13 +86,28 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	return outputStr, nil
 }
 
-func DisplayTransferHistory(db *sql.DB, phoneSender string) []models.TransferHistory {
-	sqlQuery := `
+func DisplayTransferHistory(db *sql.DB, role, phoneSender string) []models.TransferHistory {
+	sqlQuery := ""
+
+	sqlQuerySender := `
 		SELECT th.id, th.user_id_sender, th.user_id_recipient, th.amount, th.created_at
 		FROM transfer_histories th
 		INNER JOIN users u ON th.user_id_sender = u.id
 		WHERE u.phone = ?
 	`
+
+	sqlQueryRecipient := `
+		SELECT th.id, th.user_id_sender, th.user_id_recipient, th.amount, th.created_at
+		FROM transfer_histories th
+		INNER JOIN users u ON th.user_id_recipient = u.id
+		WHERE u.phone = ?
+	`
+
+	if role == "sender" {
+		sqlQuery = sqlQuerySender
+	} else {
+		sqlQuery = sqlQueryRecipient
+	}
 
 	stmt, err := db.Prepare(sqlQuery)
 	if err != nil {
