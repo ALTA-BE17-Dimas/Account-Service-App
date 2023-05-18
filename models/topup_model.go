@@ -8,4 +8,4 @@ type TopUpHistory struct {
 	UserID    string
 	Amount    float64
 	CreatedAt time.Time
-
+}
