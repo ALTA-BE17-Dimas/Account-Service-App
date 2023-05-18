@@ -19,13 +19,13 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	defer tx.Rollback() // statement is used to ensure that the prepared statement is closed after it has been executed or if an error occurs.
 
 	// Query the sender's balance
-	sqlQuery1 := `SELECT balance FROM users WHERE phone = ?`
+	sqlQuery1 := `SELECT balance FROM users WHERE phone = ? AND deleted_at IS NULL`
 	stmt, err := tx.Prepare(sqlQuery1)
 	checkErrorPrepare(err)
 	defer stmt.Close()
 
 	// Update the sender's balance
-	sqlQuery2 := `UPDATE users SET balance = balance + ? WHERE phone = ?`
+	sqlQuery2 := `UPDATE users SET balance = balance + ? WHERE phone = ? AND deleted_at IS NULL`
 	stmt, err = tx.Prepare(sqlQuery2)
 	checkErrorPrepare(err)
 
@@ -35,7 +35,7 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	}
 
 	// Select user id for sender and recipient
-	sqlQuery3 := `SELECT id FROM users WHERE phone = ?`
+	sqlQuery3 := `SELECT id FROM users WHERE phone = ? AND deleted_at IS NULL`
 	stmt, err = tx.Prepare(sqlQuery3)
 	checkErrorPrepare(err)
 
@@ -58,7 +58,7 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	}
 
 	// Update the recipient's balance
-	sqlQuery4 := `UPDATE users SET balance = balance + ? WHERE phone = ?`
+	sqlQuery4 := `UPDATE users SET balance = balance + ? WHERE phone = ? AND deleted_at IS NULL`
 	stmt, err = tx.Prepare(sqlQuery4)
 	checkErrorPrepare(err)
 
@@ -86,32 +86,51 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	return outputStr, nil
 }
 
-func DisplayTransferHistory(db *sql.DB, phoneSender string) []models.TransferHistory {
-	sqlQuery := `
-		SELECT th.id, th.user_id_sender, th.user_id_recipient, th.amount, th.created_at
+func DisplayTransferHistory(db *sql.DB, role, phoneSender string) ([]models.History, error) {
+	var sqlQuery string
+
+	sqlQueryRecipient := `
+		SELECT th.id, recipient.phone, th.amount, th.created_at
 		FROM transfer_histories th
-		INNER JOIN users u ON th.user_id_sender = u.id
-		WHERE u.phone = ?
+		INNER JOIN users sender ON th.user_id_sender = sender.id
+		INNER JOIN users recipient ON th.user_id_recipient = recipient.id
+		WHERE sender.phone = ? AND sender.deleted_at IS NULL
+		ORDER BY th.id ASC
 	`
+
+	sqlQuerySender := `
+		SELECT th.id, sender.phone, th.amount, th.created_at
+		FROM transfer_histories th
+		INNER JOIN users sender ON th.user_id_sender = sender.id
+		INNER JOIN users recipient ON th.user_id_recipient = recipient.id
+		WHERE recipient.phone = ? AND recipient.deleted_at IS NULL
+		ORDER BY th.id ASC
+	`
+
+	if role == "sender" {
+		sqlQuery = sqlQueryRecipient
+	} else {
+		sqlQuery = sqlQuerySender
+	}
 
 	stmt, err := db.Prepare(sqlQuery)
 	if err != nil {
-		log.Fatalf("failed to prepare SQL statement: %v", err)
+		return []models.History{}, fmt.Errorf("failed to prepare SQL statement: %v", err)
 	}
 	defer stmt.Close()
 
 	rows, err := stmt.Query(phoneSender)
 	if err != nil {
-		log.Fatalf("failed to query transfer histories: %v", err)
+		return []models.History{}, fmt.Errorf("failed to query transfer histories: %v", err)
 	}
 	defer rows.Close()
 
-	var histories []models.TransferHistory
+	var histories []models.History
 	for rows.Next() {
-		var history models.TransferHistory
+		var history models.History
 		var createdAt []uint8 // Use []byte to store the raw value
 
-		err := rows.Scan(&history.ID, &history.UserIDSender, &history.UserIDRecipient, &history.Amount, &createdAt)
+		err := rows.Scan(&history.ID, &history.PhoneNumber, &history.Amount, &createdAt)
 		if err != nil {
 			log.Printf("failed to scan transfer history: %v", err)
 			continue
@@ -125,7 +144,12 @@ func DisplayTransferHistory(db *sql.DB, phoneSender string) []models.TransferHis
 		}
 		histories = append(histories, history)
 	}
-	return histories
+
+	if err := rows.Err(); err != nil {
+		log.Printf("error iterating over transfer histories: %v", err)
+	}
+
+	return histories, nil
 }
 
 func checkErrorPrepare(err error) error {
