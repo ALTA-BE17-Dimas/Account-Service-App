@@ -24,24 +24,8 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	checkErrorPrepare(err)
 	defer stmt.Close()
 
-	// Confirm that sender's balance is enough for making transfer
-	var balance float64
-	err = stmt.QueryRow(phoneSender).Scan(&balance)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("user's account not found")
-		}
-		return "", fmt.Errorf("failed to query sender's account: %v", err)
-	}
-
-	if balance <= 0 {
-		return "", fmt.Errorf("insufficient balance to make a transfer")
-	} else if balance < amount {
-		return "", fmt.Errorf("balance is not enough to make a transfer")
-	}
-
 	// Update the sender's balance
-	sqlQuery2 := `UPDATE users SET balance = balance - ? WHERE phone = ?`
+	sqlQuery2 := `UPDATE users SET balance = balance + ? WHERE phone = ?`
 	stmt, err = tx.Prepare(sqlQuery2)
 	checkErrorPrepare(err)
 
