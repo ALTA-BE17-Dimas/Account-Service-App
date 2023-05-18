@@ -474,7 +474,6 @@ firstOuter:
 							fmt.Printf("%+v\n", value)
 						}
 						fmt.Println("Count:", transferCounter)
-
 					case 2:
 						histories := controllers.DisplayTransferHistory(db, "recipient", phoneNumber)
 						fmt.Printf("\n")
@@ -487,7 +486,6 @@ firstOuter:
 							fmt.Printf("%+v\n", value)
 						}
 						fmt.Println("Count:", transferCounter)
-
 					case 3:
 						tfHistoryLoop = false
 					}
