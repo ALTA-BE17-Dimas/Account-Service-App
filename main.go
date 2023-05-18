@@ -296,7 +296,6 @@ firstOuter:
 								log.Println("Error:", err.Error())
 							}
 						}
-
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Email", "email", newValue)
 						if err != nil {
 							log.Printf("Error: %s\n", err.Error())
@@ -324,7 +323,6 @@ firstOuter:
 								log.Println("Error:", err.Error())
 							}
 						}
-
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Phone number", "phone", newValue)
 						if err != nil {
 							log.Printf("Error: %s\n", err.Error())
@@ -336,7 +334,7 @@ firstOuter:
 
 					case 6: // Update user account password
 						var newValue string
-						passHashing := ""
+						var passHashing string
 						passUpdateLoop := true
 						for passUpdateLoop {
 							fmt.Println("\nPress (x) to go back")
@@ -356,7 +354,6 @@ firstOuter:
 								log.Println("Error:", err.Error())
 							}
 						}
-
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Password", "password", passHashing)
 						if err != nil {
 							log.Printf("Error: %s\n", err.Error())
