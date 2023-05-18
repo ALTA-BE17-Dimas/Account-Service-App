@@ -43,6 +43,8 @@ func main() {
 	var phoneNumber, password string
 
 	loop := true
+
+firstOuter:
 	for loop {
 		fmt.Println(menu)
 
@@ -58,7 +60,7 @@ func main() {
 		fmt.Scanln(&option)
 
 		switch option {
-		case 1:
+		case 1: // Register new user account
 			if (phoneNumber != "") || (password != "") {
 				fmt.Printf("\nYou have to log out first!\n")
 			} else {
@@ -149,7 +151,7 @@ func main() {
 				}
 			}
 
-		case 2:
+		case 2: // Login user account
 			fmt.Print("\nEnter phone number: ")
 			fmt.Scanln(&phoneNumber)
 			fmt.Print("\nEnter password: ")
@@ -164,7 +166,7 @@ func main() {
 				log.Printf("%s\n", str)
 			}
 
-		case 3:
+		case 3: // Read user account
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
@@ -176,7 +178,8 @@ func main() {
 					fmt.Printf("\n%s\n", user)
 				}
 			}
-		case 4:
+
+		case 4: // Update user account
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
@@ -193,7 +196,7 @@ func main() {
 				`
 
 				updateLoop := true
-			outer:
+			secondOuter:
 				for updateLoop {
 					fmt.Println(updateMenu)
 					fmt.Print("\nEnter update menu option: ")
@@ -201,7 +204,7 @@ func main() {
 					fmt.Scanln(&option)
 
 					switch option {
-					case 1:
+					case 1: // Update user account name
 						fmt.Println("\nPress (x) to go back")
 						fmt.Print("\nEnter new full name\t: ")
 						var newValue string
@@ -209,7 +212,7 @@ func main() {
 						checkError(err)
 
 						if newValue == "x" {
-							continue outer
+							continue secondOuter
 						}
 
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Full name", "full_name", newValue)
@@ -218,7 +221,8 @@ func main() {
 						} else {
 							fmt.Printf("\n%s\n", str)
 						}
-					case 2:
+
+					case 2: // Update user account birth date
 						var newValue string
 						var newBirthDate time.Time
 						birthDateUpdateLoop := true
@@ -229,7 +233,7 @@ func main() {
 							checkError(err)
 
 							if newValue == "x" {
-								continue outer
+								continue secondOuter
 							}
 
 							birthDateIsValid, birthDate, err := helpers.ValidateDate(newValue)
@@ -247,7 +251,8 @@ func main() {
 						} else {
 							fmt.Printf("\n%s\n", str)
 						}
-					case 3:
+
+					case 3: // Update user account address
 						fmt.Println("\nPress (x) to go back")
 						fmt.Print("\nEnter new address\t: ")
 						var newValue string
@@ -255,7 +260,7 @@ func main() {
 						checkError(err)
 
 						if newValue == "x" {
-							continue outer
+							continue secondOuter
 						}
 
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Address", "address", newValue)
@@ -264,7 +269,8 @@ func main() {
 						} else {
 							fmt.Printf("\n%s\n", str)
 						}
-					case 4:
+
+					case 4: // Update user account email
 						var newValue string
 						mailUpdateLoop := true
 						for mailUpdateLoop {
@@ -274,7 +280,7 @@ func main() {
 							checkError(err)
 
 							if newValue == "x" {
-								continue outer
+								continue secondOuter
 							}
 
 							emailIsValid, err := helpers.ValidateEmail(newValue)
@@ -284,13 +290,15 @@ func main() {
 								log.Println("Error:", err.Error())
 							}
 						}
+
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Email", "email", newValue)
 						if err != nil {
 							log.Printf("Error: %s\n", err.Error())
 						} else {
 							fmt.Printf("\n%s\n", str)
 						}
-					case 5:
+
+					case 5: // Update user account phone number
 						var newValue string
 						phoneNumberUpdateLoop := true
 						for phoneNumberUpdateLoop {
@@ -300,7 +308,7 @@ func main() {
 							checkError(err)
 
 							if newValue == "x" {
-								continue outer
+								continue secondOuter
 							}
 
 							isPhoneNumberValid, err := helpers.ValidatePhoneNumber(newValue)
@@ -310,13 +318,17 @@ func main() {
 								log.Println("Error:", err.Error())
 							}
 						}
+
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Phone number", "phone", newValue)
 						if err != nil {
 							log.Printf("Error: %s\n", err.Error())
 						} else {
+							_ = controllers.LogOutAccount(&phoneNumber, &password)
 							fmt.Printf("\n%s\n", str)
+							continue firstOuter
 						}
-					case 6:
+
+					case 6: // Update user account password
 						var newValue string
 						passHashing := ""
 						passUpdateLoop := true
@@ -327,7 +339,7 @@ func main() {
 							checkError(err)
 
 							if newValue == "x" {
-								continue outer
+								continue secondOuter
 							}
 
 							isPassValid, err := helpers.ValidatePassword(newValue)
@@ -338,19 +350,24 @@ func main() {
 								log.Println("Error:", err.Error())
 							}
 						}
+
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Password", "password", passHashing)
 						if err != nil {
 							log.Printf("Error: %s\n", err.Error())
 						} else {
+							_ = controllers.LogOutAccount(&phoneNumber, &password)
 							fmt.Printf("\n%s\n", str)
+							continue firstOuter
 						}
-					case 7:
+
+					case 7: // Exit from update
 						updateLoop = false
 						fmt.Printf("\nUpdate complete.\n")
 					}
 				}
 			}
-		case 5:
+
+		case 5: // Delete user account
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
@@ -359,12 +376,14 @@ func main() {
 					fmt.Println("")
 					log.Printf("Error: %s\n", err.Error())
 				} else {
+					_ = controllers.LogOutAccount(&phoneNumber, &password)
 					fmt.Println("")
 					log.Printf("%s", str)
+					continue firstOuter
 				}
 			}
 
-		case 7:
+		case 7: // Transfer balance to another account
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
@@ -384,7 +403,7 @@ func main() {
 				}
 			}
 
-		case 9:
+		case 9: // Display transfer history user account
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
@@ -415,6 +434,7 @@ func main() {
 							fmt.Printf("%+v\n", value)
 						}
 						fmt.Println("Count:", transferCounter)
+
 					case 2:
 						histories := controllers.DisplayTransferHistory(db, "recipient", phoneNumber)
 						fmt.Printf("\n")
@@ -427,6 +447,7 @@ func main() {
 							fmt.Printf("%+v\n", value)
 						}
 						fmt.Println("Count:", transferCounter)
+
 					case 3:
 						tfHistoryLoop = false
 					}
@@ -435,7 +456,7 @@ func main() {
 
 			}
 
-		case 10:
+		case 10: // Read other user account
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
@@ -455,10 +476,12 @@ func main() {
 					}
 				}
 			}
-		case 11:
+
+		case 11: // Logout from user account
 			str := controllers.LogOutAccount(&phoneNumber, &password)
 			fmt.Println(str)
-		case 12:
+
+		case 12: // Exit from program
 			loop = false
 			fmt.Printf("\nExit program\n")
 		}
