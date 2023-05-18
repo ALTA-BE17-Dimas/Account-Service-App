@@ -212,3 +212,15 @@ func UpdateAccount(db *sql.DB, phoneNumber, updateOption, column string, value i
 	outputStr := fmt.Sprintf("[SUCCESS] %s updated successfully", updateOption)
 	return outputStr, nil
 }
+
+func GetAccountInfo(db *sql.DB, phoneNumber string) (string, string) {
+	sqlQuery := `SELECT id, full_name FROM users WHERE phone = ?`
+	stmt, err := db.Prepare(sqlQuery)
+	checkErrorPrepare(err)
+	defer stmt.Close()
+
+	var user models.User
+	_ = stmt.QueryRow(phoneNumber).Scan(&user.ID, &user.FullName)
+
+	return user.ID, user.FullName
+}
