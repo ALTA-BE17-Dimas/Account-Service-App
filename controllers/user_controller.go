@@ -17,9 +17,8 @@ func RegisterAccount(db *sql.DB, user models.User) (string, error) {
 
 	// Prepared statement from the SQL statement before executed
 	stmt, err := db.Prepare(sqlStatement)
-	if err != nil {
-		log.Fatal("Error:", err.Error())
-	}
+	checkErrorPrepare(err)
+	defer stmt.Close()
 
 	// Validating email format
 	emailIsValid, err := helpers.ValidateEmail(user.Email)
@@ -64,33 +63,17 @@ func DeleteAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 
 	// Prepared statement from the SQL statement before executed
 	stmt, err := db.Prepare(sqlQuery1)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var storedPassword string
-	sqlQuery2 := `SELECT password FROM users WHERE phone = ?`
-	err = db.QueryRow(sqlQuery2, phoneNumber).Scan(&storedPassword)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("user not found. Cannot delete account")
-		}
-		return "", fmt.Errorf("error querying password from database: %v", err)
-	}
-
-	err = helpers.ComparePass([]byte(storedPassword), []byte(password))
-	if err != nil {
-		return "", fmt.Errorf("invalid password. Cannot delete account")
-	}
+	checkErrorPrepare(err)
+	defer stmt.Close()
 
 	result, err := stmt.Exec(phoneNumber)
 	if err != nil {
-		return "", fmt.Errorf("error: %v", err)
+		return "", fmt.Errorf("failed to delete account: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return "", fmt.Errorf("error: %v", err)
+		return "", fmt.Errorf("failed to delete account: %v", err)
 	}
 
 	outputStr := ""
@@ -98,7 +81,7 @@ func DeleteAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	if rowsAffected == 0 {
 		outputStr = fmt.Sprintln("[FAIL] User not found. Cannot delete account")
 	} else {
-		outputStr = fmt.Sprintf("\n[SUCCESS] Account deleted successfully. Rows affected: %d\n", rowsAffected)
+		outputStr = fmt.Sprintf("[SUCCESS] Account deleted successfully. Rows affected: %d\n", rowsAffected)
 	}
 
 	return outputStr, nil
@@ -110,15 +93,14 @@ func LoginAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	// Prepare the SQL statement
 	sqlQuery := `SELECT password FROM users WHERE phone = ?`
 	stmt, err := db.Prepare(sqlQuery)
-	if err != nil {
-		return "", fmt.Errorf("failed to prepare SQL statement: %v", err)
-	}
+	checkErrorPrepare(err)
+	defer stmt.Close()
 
 	// Query the password from the database
 	err = stmt.QueryRow(phoneNumber).Scan(&storedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("invalid phone number")
+			return "", fmt.Errorf("login failed, invalid phone number")
 		}
 		return "", fmt.Errorf("error querying password from database: %v", err)
 	}
@@ -126,15 +108,15 @@ func LoginAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	// Compare the stored password with the provided password
 	err = helpers.ComparePass([]byte(storedPassword), []byte(password))
 	if err != nil {
-		return "", fmt.Errorf("login failed: Invalid password")
+		return "", fmt.Errorf("login failed, invalid password")
 	}
 
-	outputStr := "\n[SUCCESS] Login successful!\n"
+	outputStr := "[SUCCESS] Login successful!\n"
 
 	return outputStr, nil
 }
 
-func ReadOtherAccount(db *sql.DB, phoneNumber string) (models.User, error) {
+func ReadOtherAccount(db *sql.DB, phoneNumber string) (string, error) {
 	sqlStatement := `
 		SELECT id, full_name, birth_date, address, email, phone
 		FROM users
@@ -142,9 +124,8 @@ func ReadOtherAccount(db *sql.DB, phoneNumber string) (models.User, error) {
 	`
 
 	stmt, err := db.Prepare(sqlStatement)
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErrorPrepare(err)
+	defer stmt.Close()
 
 	var user models.User
 	err = stmt.QueryRow(phoneNumber).Scan(
@@ -152,42 +133,66 @@ func ReadOtherAccount(db *sql.DB, phoneNumber string) (models.User, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return models.User{}, fmt.Errorf("user's account not found")
+			return "", fmt.Errorf("user's account not found")
 		}
-		return models.User{}, fmt.Errorf("error querying user's account: %v", err)
+		return "", fmt.Errorf("error querying user's account: %v", err)
 	}
 
-	fmt.Printf("\n[SUCCESS] Account is found.\n\n")
-	return user, nil
+	outputStr := fmt.Sprintln("-----------------------------------------")
+	outputStr += fmt.Sprintln("Account Information")
+	outputStr += fmt.Sprintln("-----------------------------------------")
+	outputStr += fmt.Sprintf("ID\t\t: %s\n", user.ID)
+	outputStr += fmt.Sprintf("Full Name\t: %s\n", user.FullName)
+	outputStr += fmt.Sprintf("Birth Date\t: %s\n", user.BirthDate)
+	outputStr += fmt.Sprintf("Address\t\t: %s\n", user.Address)
+	outputStr += fmt.Sprintf("Email\t\t: %s\n", user.Email)
+	outputStr += fmt.Sprintf("Phone Number\t: %s\n", user.PhoneNumber)
+	outputStr += fmt.Sprintln("-----------------------------------------")
+
+	fmt.Println("")
+	log.Printf("[SUCCESS] Account is found.\n")
+
+	return outputStr, nil
 }
 
 func ReadAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	sqlStatement :=
-		`SELECT full_name, identity_number, birth_date, address, email, phone, balance, password 
+		`SELECT id, full_name, identity_number, birth_date, address, email, phone, balance
 		FROM users WHERE phone=?`
 
 	// prepared statement from the SQL statement before executed
 	stmt, err := db.Prepare(sqlStatement)
-	if err != nil {
-		log.Fatal(err)
-	}
-	//var fullName, identityNumber, birthDate, address, email, Password string
-	//var Balance float64
+	checkErrorPrepare(err)
+	defer stmt.Close()
+
 	var user models.User
-	err = stmt.QueryRow(phoneNumber).Scan(&user.FullName, &user.IdentityNumber, &user.BirthDate, &user.Address, &user.Email, &user.PhoneNumber, &user.Balance, &user.Password)
+	err = stmt.QueryRow(phoneNumber).Scan(&user.ID, &user.FullName, &user.IdentityNumber, &user.BirthDate, &user.Address, &user.Email, &user.PhoneNumber, &user.Balance)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", fmt.Errorf("User not found")
+			return "", fmt.Errorf("user not found")
 		}
-		return "", fmt.Errorf("Error reading account: %v", err)
+		return "", fmt.Errorf("error reading account: %v", err)
 	}
 
-	err = helpers.ComparePass([]byte(user.Password), []byte(password))
-	if err != nil {
-		return "", fmt.Errorf("login failed: Invalid password")
-	}
-
-	outputStr := fmt.Sprintf("Account Profil:\nFull Name: %s\nIndentity Number: %s\nBirth of Date: %s\nEmail: %s\nPhone Number: %s\nAddress: %s\nBalance: %f\n", user.FullName, user.IdentityNumber, user.BirthDate, user.Email, user.PhoneNumber, user.Address, user.Balance)
+	outputStr := fmt.Sprintln("-----------------------------------------")
+	outputStr += fmt.Sprintln("Your Account Information")
+	outputStr += fmt.Sprintln("-----------------------------------------")
+	outputStr += fmt.Sprintf("ID\t\t: %s\n", user.ID)
+	outputStr += fmt.Sprintf("Full Name\t: %s\n", user.FullName)
+	outputStr += fmt.Sprintf("Identity Number\t: %s\n", user.IdentityNumber)
+	outputStr += fmt.Sprintf("Birth Date\t: %s\n", user.BirthDate)
+	outputStr += fmt.Sprintf("Address\t\t: %s\n", user.Address)
+	outputStr += fmt.Sprintf("Email\t\t: %s\n", user.Email)
+	outputStr += fmt.Sprintf("Phone Number\t: %s\n", user.PhoneNumber)
+	outputStr += fmt.Sprintf("Balance\t\t: %.2f\n", user.Balance)
+	outputStr += fmt.Sprintln("-----------------------------------------")
 
 	return outputStr, nil
+}
+
+func LogOutAccount(phoneNumber, password *string) string {
+	*phoneNumber = ""
+	*password = ""
+
+	return "\n[SUCCESS] Log out success"
 }
