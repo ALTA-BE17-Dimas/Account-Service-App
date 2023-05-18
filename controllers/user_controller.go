@@ -59,30 +59,20 @@ func RegisterAccount(db *sql.DB, user models.User) (string, error) {
 }
 
 func DeleteAccount(db *sql.DB, phoneNumber, password string) (string, error) {
-	sqlQuery1 := `DELETE FROM users WHERE phone=?`
+	// sqlQuery1 := `DELETE FROM users WHERE phone=?` // hard-delete
+	sqlQuery := `UPDATE users SET deleted_at = CURRENT_TIMESTAMP WHERE phone = ?`
 
 	// Prepared statement from the SQL statement before executed
-	stmt, err := db.Prepare(sqlQuery1)
+	stmt, err := db.Prepare(sqlQuery)
 	checkErrorPrepare(err)
 	defer stmt.Close()
 
-	result, err := stmt.Exec(phoneNumber)
+	_, err = stmt.Exec(phoneNumber)
 	if err != nil {
 		return "", fmt.Errorf("failed to delete account: %v", err)
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return "", fmt.Errorf("failed to delete account: %v", err)
-	}
-
-	outputStr := ""
-
-	if rowsAffected == 0 {
-		outputStr = fmt.Sprintln("[FAIL] User not found. Cannot delete account")
-	} else {
-		outputStr = fmt.Sprintf("[SUCCESS] Account deleted successfully. Rows affected: %d\n", rowsAffected)
-	}
+	outputStr := "[SUCCESS] Account deleted successfully.\n"
 
 	return outputStr, nil
 }
@@ -91,7 +81,7 @@ func LoginAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	var storedPassword string
 
 	// Prepare the SQL statement
-	sqlQuery := `SELECT password FROM users WHERE phone = ?`
+	sqlQuery := `SELECT password FROM users WHERE phone = ? AND deleted_at IS NULL`
 	stmt, err := db.Prepare(sqlQuery)
 	checkErrorPrepare(err)
 	defer stmt.Close()
@@ -119,8 +109,7 @@ func LoginAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 func ReadOtherAccount(db *sql.DB, phoneNumber string) (string, error) {
 	sqlStatement := `
 		SELECT id, full_name, birth_date, address, email, phone
-		FROM users
-		WHERE phone=?
+		FROM users WHERE phone=? AND deleted_at IS NULL
 	`
 
 	stmt, err := db.Prepare(sqlStatement)
@@ -158,7 +147,7 @@ func ReadOtherAccount(db *sql.DB, phoneNumber string) (string, error) {
 func ReadAccount(db *sql.DB, phoneNumber, password string) (string, error) {
 	sqlStatement :=
 		`SELECT id, full_name, identity_number, birth_date, address, email, phone, balance
-		FROM users WHERE phone=?`
+		FROM users WHERE phone=? AND deleted_at IS NULL`
 
 	// prepared statement from the SQL statement before executed
 	stmt, err := db.Prepare(sqlStatement)
@@ -198,7 +187,7 @@ func LogOutAccount(phoneNumber, password *string) string {
 }
 
 func UpdateAccount(db *sql.DB, phoneNumber, updateOption, column string, value interface{}) (string, error) {
-	sqlQuery := "UPDATE users SET " + column + " = ? WHERE phone = ?"
+	sqlQuery := "UPDATE users SET " + column + " = ? WHERE phone = ? AND deleted_at IS NULL"
 
 	stmt, err := db.Prepare(sqlQuery)
 	checkErrorPrepare(err)
@@ -214,7 +203,7 @@ func UpdateAccount(db *sql.DB, phoneNumber, updateOption, column string, value i
 }
 
 func GetAccountInfo(db *sql.DB, phoneNumber string) (string, string) {
-	sqlQuery := `SELECT id, full_name FROM users WHERE phone = ?`
+	sqlQuery := `SELECT id, full_name FROM users WHERE phone = ? AND deleted_at IS NULL`
 	stmt, err := db.Prepare(sqlQuery)
 	checkErrorPrepare(err)
 	defer stmt.Close()
