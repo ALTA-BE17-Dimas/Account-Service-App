@@ -4,6 +4,8 @@ import (
 	"alta/account-service-app/models"
 	"database/sql"
 	"fmt"
+	"time"
+	"log"
 )
 
 func Topup(db *sql.DB, phoneNumber string, amount float64) (string, error) {
@@ -85,15 +87,20 @@ func Topup(db *sql.DB, phoneNumber string, amount float64) (string, error) {
 	return outputStr, nil
 }
 
-func GetTopupHistories(db *sql.DB, phoneNumber string) ([]models.TopUpHistory, error) {
+func DisplayTopupHistories(db *sql.DB, phoneNumber string) ([]models.TopUpHistory, error) {
 	// Query top-up histories for a specific user
 	sqlQuery := `
-		SELECT th.user_id, u.phone, th.amount, th.created_at
-		FROM top_up_histories th
-		JOIN users u ON th.user_id = u.id
+		SELECT th.user_id, th.amount, th.created_at
+		FROM top_up_histories AS th
+		JOIN users AS u ON th.user_id = u.id
 		WHERE u.phone = ?
 		ORDER BY th.created_at DESC
 	`
+		// SELECT th.user_id, th.amount, th.created_at
+		// FROM transfer_histories th
+		// INNER JOIN users u ON th.user_id = u.id
+		// WHERE u.phone = ?
+	
 	stmt, err := db.Prepare(sqlQuery)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare query: %v", err)
@@ -109,9 +116,17 @@ func GetTopupHistories(db *sql.DB, phoneNumber string) ([]models.TopUpHistory, e
 	histories := []models.TopUpHistory{}
 	for rows.Next() {
 		var history models.TopUpHistory
-		err := rows.Scan(&history.UserID, &history.Amount, &history.CreatedAt, phoneNumber)
+		var createdAt []uint8 // Use []byte to store the raw value
+		err := rows.Scan(&history.UserID, &history.Amount, &createdAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %v", err)
+		}
+		// Parse the createdAt value into a time.Time variable
+		createdAtStr := string(createdAt)
+		history.CreatedAt, err = time.Parse("2006-01-02 15:04:05", createdAtStr)
+		if err != nil {
+			log.Printf("failed to parse created_at value: %v", err)
+			continue
 		}
 		histories = append(histories, history)
 	}

@@ -245,7 +245,7 @@ func main() {
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
 			} else {
-				histories, err := controllers.GetTopupHistories(db, phoneNumber)
+				histories, err := controllers.DisplayTopupHistories(db, phoneNumber)
 				if err != nil {
 					log.Fatal(err)
 				}
