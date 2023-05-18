@@ -467,7 +467,8 @@ firstOuter:
 
 					switch option {
 					case 1:
-						histories := controllers.DisplayTransferHistory(db, "sender", phoneNumber)
+						histories, err := controllers.DisplayTransferHistory(db, "sender", phoneNumber)
+						checkError(err)
 						fmt.Printf("\n")
 						fmt.Println("-----------------------------------------")
 						fmt.Printf("Your transfer history as sender: \n")
@@ -480,7 +481,8 @@ firstOuter:
 						fmt.Println("Count:", transferCounter)
 
 					case 2:
-						histories := controllers.DisplayTransferHistory(db, "recipient", phoneNumber)
+						histories, err := controllers.DisplayTransferHistory(db, "recipient", phoneNumber)
+						checkError(err)
 						fmt.Printf("\n")
 						fmt.Println("-----------------------------------------")
 						fmt.Printf("Your transfer history as recipient: \n")
