@@ -251,10 +251,14 @@ func main() {
 				}
 				// Print top-up histories
 				for _, history := range histories {
+					fmt.Printf("\n")
+					fmt.Println("-----------------------------------------")
+					fmt.Printf("Your Topup History: \n")
+					fmt.Println("-----------------------------------------")
 					fmt.Printf("User ID: %d\n", history.UserID)
 					fmt.Printf("Amount: %.2f\n", history.Amount)
 					fmt.Printf("Time: %s\n", history.CreatedAt.Format("2006-01-02 15:04:05"))
-					fmt.Println("--------------------")
+					fmt.Println("-----------------------------------------")
 				}
 			}
 

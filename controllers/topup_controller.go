@@ -38,23 +38,17 @@ func Topup(db *sql.DB, phoneNumber string, amount float64) (string, error) {
 	//update user balance
 	sqlQuery2 := `UPDATE users SET balance = balance + ? WHERE phone = ?`
 	stmt, err = transaction.Prepare(sqlQuery2)
-	if err != nil{
-		return"", fmt.Errorf("failed to prepare update statement: %v", err)
-	}
-	defer stmt.Close()
-	
+	checkErrorPrepare(err)
+		
 	_, err = stmt.Exec(amount, phoneNumber)
 	if err != nil {
-		return "", fmt.Errorf("failed to update recipient's balance: %v", err)
+		return "", fmt.Errorf("failed to update user balance: %v", err)
 	}
 	
 	// Get user ID
 	sqlQuery3 := `SELECT id FROM users WHERE phone = ?`
 	stmt, err = transaction.Prepare(sqlQuery3)
-	if err != nil {
-    	return "", fmt.Errorf("failed to prepare query: %v", err)
-	}
-	defer stmt.Close()
+	checkErrorPrepare(err)
 	
 	var userID string
 	err = stmt.QueryRow(phoneNumber).Scan(&userID)
@@ -68,10 +62,7 @@ func Topup(db *sql.DB, phoneNumber string, amount float64) (string, error) {
 	// Insert a new row in the topup_histories table
 	sqlQuery4 := `INSERT INTO top_up_histories (user_id, amount, created_at) VALUES (?, ?, NOW())`
 	stmt, err = transaction.Prepare(sqlQuery4)
-	if err != nil {
-		return "", fmt.Errorf("failed to prepare insert statement: %v", err)
-	}
-	defer stmt.Close()
+	checkErrorPrepare(err)
 
 	_, err = stmt.Exec(userID, amount)
 	if err != nil {
@@ -96,14 +87,9 @@ func DisplayTopupHistories(db *sql.DB, phoneNumber string) ([]models.TopUpHistor
 		WHERE u.phone = ?
 		ORDER BY th.created_at DESC
 	`
-		// SELECT th.user_id, th.amount, th.created_at
-		// FROM transfer_histories th
-		// INNER JOIN users u ON th.user_id = u.id
-		// WHERE u.phone = ?
-	
 	stmt, err := db.Prepare(sqlQuery)
 	if err != nil {
-		return nil, fmt.Errorf("failed to prepare query: %v", err)
+		return nil, fmt.Errorf("failed to prepare SQL query: %v", err)
 	}
 	defer stmt.Close()
 
@@ -117,9 +103,10 @@ func DisplayTopupHistories(db *sql.DB, phoneNumber string) ([]models.TopUpHistor
 	for rows.Next() {
 		var history models.TopUpHistory
 		var createdAt []uint8 // Use []byte to store the raw value
+		
 		err := rows.Scan(&history.UserID, &history.Amount, &createdAt)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan row: %v", err)
+			return nil, fmt.Errorf("failed to scan top up history: %v", err)
 		}
 		// Parse the createdAt value into a time.Time variable
 		createdAtStr := string(createdAt)
@@ -132,7 +119,7 @@ func DisplayTopupHistories(db *sql.DB, phoneNumber string) ([]models.TopUpHistor
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("an error occurred while retrieving rows: %v", err)
+		return nil, fmt.Errorf("failed to prepare insert statement: %v", err)
 	}
 
 	return histories, nil
