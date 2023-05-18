@@ -184,12 +184,16 @@ func main() {
 		
 		case 6:
 			//topup
-			var topupAmount float64
-			fmt.Print("\nEnter phone number: ")
-			fmt.Scanln(&phoneNumber)
-			fmt.Print("\nEnter top amount: ")
-			fmt.Scanln(&topupAmount)
-			str, err := controllers.Topup(db, phoneNumber, topupAmount)
+			if (phoneNumber == "") || (password == "") {
+				fmt.Printf("\nYou have to login first!\n")
+			} else {
+				var topupAmount float64
+				fmt.Print("\nEnter phone number: ")
+				fmt.Scanln(&phoneNumber)
+				fmt.Print("\nEnter top amount: ")
+				fmt.Scanln(&topupAmount)
+				str, err := controllers.Topup(db, phoneNumber, topupAmount)
+
 				if err != nil {
 					fmt.Printf("\n")
 					log.Printf("Error: %s\n", err.Error())
@@ -197,7 +201,8 @@ func main() {
 					fmt.Printf("\n")
 					fmt.Printf("%s\n", str)
 				}
-			
+			}
+		
 		case 7:
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
@@ -219,22 +224,26 @@ func main() {
 			}
 
 		case 8:
-			//display top-up history
-			fmt.Print("\nEnter phone number: ")
-			fmt.Scanln(&phoneNumber)
-			histories, err := controllers.DisplayTopupHistories(db, phoneNumber)
-			if err != nil {
-				log.Fatal(err)
+		//display top-up history
+			if (phoneNumber == "") || (password == "") {
+				fmt.Printf("\nYou have to login first!\n")
+			} else {
+				histories, err := controllers.DisplayTopupHistories(db, phoneNumber)
+				if err != nil {
+					log.Fatal(err)
+				}
+				// Print top-up histories
+				for _, history := range histories {
+					fmt.Printf("\n")
+					fmt.Println("--------------------------------")
+					fmt.Printf("Your Topup History: \n")
+					fmt.Println("--------------------------------")
+					fmt.Printf("ID\t\t: %d\n", history.ID)
+					fmt.Printf("Amount\t\t: %.2f\n", history.Amount)
+					fmt.Printf("Time\t\t: %s\n", history.CreatedAt.Format("2006-01-02 15:04:05"))
+					fmt.Println("--------------------------------")
+				}
 			}
-
-			// Print top-up histories
-			for _, history := range histories {
-			fmt.Printf("User ID: %d\n", history.UserID)
-			fmt.Printf("Amount: %.2f\n", history.Amount)
-			fmt.Printf("Time: %s\n", history.CreatedAt.Format("2006-01-02 15:04:05"))
-			fmt.Println("--------------------")
-			}
-
 		case 9:
 			if (phoneNumber == "") || (password == "") {
 				fmt.Printf("\nYou have to login first!\n")
