@@ -1,7 +1,9 @@
 package models
+import "time"
 
 type TopUpHistory struct {
 	BaseModel
-	UserID uint
-	Amount float64
+	UserID 		uint
+	Amount 		float64
+	CreatedAt 	time.Time
 }
