@@ -25,7 +25,7 @@ func Transfer(db *sql.DB, phoneSender, phoneRecipient string, amount float64) (s
 	defer stmt.Close()
 
 	// Update the sender's balance
-	sqlQuery2 := `UPDATE users SET balance = balance + ? WHERE phone = ? AND deleted_at IS NULL`
+	sqlQuery2 := `UPDATE users SET balance = balance - ? WHERE phone = ? AND deleted_at IS NULL`
 	stmt, err = tx.Prepare(sqlQuery2)
 	checkErrorPrepare(err)
 
