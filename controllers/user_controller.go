@@ -196,3 +196,19 @@ func LogOutAccount(phoneNumber, password *string) string {
 
 	return "\n[SUCCESS] Log out success"
 }
+
+func UpdateAccount(db *sql.DB, phoneNumber, updateOption, column string, value interface{}) (string, error) {
+	sqlQuery := "UPDATE users SET " + column + " = ? WHERE phone = ?"
+
+	stmt, err := db.Prepare(sqlQuery)
+	checkErrorPrepare(err)
+	defer stmt.Close()
+
+	_, err = stmt.Exec(value, phoneNumber)
+	if err != nil {
+		return "", fmt.Errorf("failed to update %s: %v", updateOption, err)
+	}
+
+	outputStr := fmt.Sprintf("[SUCCESS] %s updated successfully", updateOption)
+	return outputStr, nil
+}
