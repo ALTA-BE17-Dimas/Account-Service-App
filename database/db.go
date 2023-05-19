@@ -23,7 +23,7 @@ func DBConnect(connStr string) (*sql.DB, error) {
 		return nil, fmt.Errorf("error pinging database: %w", err)
 	}
 
-	fmt.Print("\n[OK] Database connected successfully.\n\n")
+	fmt.Print("\n\033[92m[OK] Database connected successfully.\033[0m\n\n")
 
 	return db, nil
 }

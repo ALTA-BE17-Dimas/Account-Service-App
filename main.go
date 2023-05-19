@@ -16,7 +16,7 @@ func main() {
 	connStr := os.Getenv("DB_CONNECTION")
 	db, err := database.DBConnect(connStr)
 	if err != nil {
-		log.Fatal("Failed to connect to the database:", err.Error())
+		log.Fatal("\033[91mError:\033[0m", err.Error())
 	}
 
 	defer db.Close()
@@ -49,10 +49,10 @@ firstOuter:
 		fmt.Println(menu)
 
 		if (phoneNumber == "") || (password == "") {
-			fmt.Printf("\nYou are not login yet!\n")
+			fmt.Printf("\n\033[91mYou are not login yet!\033[0m\n")
 		} else {
 			id, name := controllers.GetAccountInfo(db, phoneNumber)
-			fmt.Printf("\nYou are login as (%s - %s)\n", id, name)
+			fmt.Printf("\n\033[93mYou are login as (%s - %s)\033[0m\n", id, name)
 		}
 
 		fmt.Print("\nEnter menu option: ")
@@ -62,7 +62,7 @@ firstOuter:
 		switch option {
 		case 1: // Register new user account
 			if (phoneNumber != "") || (password != "") {
-				fmt.Printf("\nYou have to log out first!\n")
+				fmt.Printf("\n\033[91mYou have to log out first!\033[0m\n")
 			} else {
 				// create new user
 				newUser := models.User{Balance: 0}
@@ -94,7 +94,7 @@ firstOuter:
 					if birthDateIsValid {
 						birthDateLoop = false
 					} else {
-						log.Println("Error:", err.Error())
+						log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 					}
 				}
 
@@ -108,7 +108,7 @@ firstOuter:
 					if emailIsValid {
 						mailLoop = false
 					} else {
-						log.Println("Error:", err.Error())
+						log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 					}
 				}
 
@@ -122,7 +122,7 @@ firstOuter:
 					if isPhoneNumberValid {
 						phoneNumberLoop = false
 					} else {
-						log.Println("Error:", err.Error())
+						log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 					}
 				}
 
@@ -136,7 +136,7 @@ firstOuter:
 					if isPassValid {
 						passLoop = false
 					} else {
-						log.Println("Error:", err.Error())
+						log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 					}
 				}
 
@@ -144,16 +144,16 @@ firstOuter:
 				str, err := controllers.RegisterAccount(db, newUser)
 				if err != nil {
 					fmt.Printf("\n")
-					log.Printf("Error: %s\n", err.Error())
+					log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 				} else {
 					fmt.Printf("\n")
-					fmt.Printf("%s\n", str)
+					log.Printf("\033[92m%s\033[0m\n", str)
 				}
 			}
 
 		case 2: // Login user account
 			if (phoneNumber != "") || (password != "") {
-				fmt.Printf("\nYou have to log out first!\n")
+				fmt.Printf("\n\033[91mYou have to log out first!\033[0m\n")
 			} else {
 				fmt.Print("\nEnter phone number: ")
 				fmt.Scanln(&phoneNumber)
@@ -164,29 +164,29 @@ firstOuter:
 				if err != nil {
 					_ = controllers.LogOutAccount(&phoneNumber, &password)
 					fmt.Println("")
-					log.Printf("[FAIL] %s\n", err.Error())
+					log.Printf("\033[91m[FAIL] %s\033[0m\n", err.Error())
 				} else {
 					fmt.Println("")
-					log.Printf("%s\n", str)
+					log.Printf("\033[92m%s\033[0m\n", str)
 				}
 			}
 
 		case 3: // Read user account
 			if (phoneNumber == "") || (password == "") {
-				fmt.Printf("\nYou have to login first!\n")
+				fmt.Printf("\n\033[91mYou have to login first!\033[0m\n")
 			} else {
 				user, err := controllers.ReadAccount(db, phoneNumber, password)
 				fmt.Print("\n")
 				if err != nil {
-					log.Printf("Error: %s\n", err.Error())
+					log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 				} else {
-					fmt.Printf("\n%s\n", user)
+					log.Printf("\n\033[95m%s\033[0m\n", user)
 				}
 			}
 
 		case 4: // Update user account
 			if (phoneNumber == "") || (password == "") {
-				fmt.Printf("\nYou have to login first!\n")
+				fmt.Printf("\n\033[91mYou have to login first!\033[0m\n")
 			} else {
 				updateMenu := `
 				Select the section you want to update:
@@ -222,9 +222,9 @@ firstOuter:
 
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Full name", "full_name", newValue)
 						if err != nil {
-							log.Printf("Error: %s\n", err.Error())
+							log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 						} else {
-							fmt.Printf("\n%s\n", str)
+							log.Printf("\n\033[92m%s\033[0m\n", str)
 						}
 
 					case 2: // Update user account birth date
@@ -246,15 +246,15 @@ firstOuter:
 								newBirthDate = birthDate
 								birthDateUpdateLoop = false
 							} else {
-								log.Println("Error:", err.Error())
+								log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 							}
 						}
 
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Birth date", "birth_date", newBirthDate)
 						if err != nil {
-							log.Printf("Error: %s\n", err.Error())
+							log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 						} else {
-							fmt.Printf("\n%s\n", str)
+							log.Printf("\n\033[92m%s\033[0m\n", str)
 						}
 
 					case 3: // Update user account address
@@ -270,9 +270,9 @@ firstOuter:
 
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Address", "address", newValue)
 						if err != nil {
-							log.Printf("Error: %s\n", err.Error())
+							log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 						} else {
-							fmt.Printf("\n%s\n", str)
+							log.Printf("\n\033[92m%s\033[0m\n", str)
 						}
 
 					case 4: // Update user account email
@@ -292,15 +292,15 @@ firstOuter:
 							if emailIsValid {
 								mailUpdateLoop = false
 							} else {
-								log.Println("Error:", err.Error())
+								log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 							}
 						}
 
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Email", "email", newValue)
 						if err != nil {
-							log.Printf("Error: %s\n", err.Error())
+							log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 						} else {
-							fmt.Printf("\n%s\n", str)
+							log.Printf("\n\033[92m%s\033[0m\n", str)
 						}
 
 					case 5: // Update user account phone number
@@ -320,16 +320,16 @@ firstOuter:
 							if isPhoneNumberValid {
 								phoneNumberUpdateLoop = false
 							} else {
-								log.Println("Error:", err.Error())
+								log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 							}
 						}
 
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Phone number", "phone", newValue)
 						if err != nil {
-							log.Printf("Error: %s\n", err.Error())
+							log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 						} else {
 							_ = controllers.LogOutAccount(&phoneNumber, &password)
-							fmt.Printf("\n%s\n", str)
+							log.Printf("\n\033[92m%s\033[0m\n", str)
 							continue firstOuter
 						}
 
@@ -352,16 +352,16 @@ firstOuter:
 								passHashing = helpers.HashPass(newValue)
 								passUpdateLoop = false
 							} else {
-								log.Println("Error:", err.Error())
+								log.Printf("\n\033[91mError: %s\033[0m\n", err.Error())
 							}
 						}
 
 						str, err := controllers.UpdateAccount(db, phoneNumber, "Password", "password", passHashing)
 						if err != nil {
-							log.Printf("Error: %s\n", err.Error())
+							log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 						} else {
 							_ = controllers.LogOutAccount(&phoneNumber, &password)
-							fmt.Printf("\n%s\n", str)
+							log.Printf("\n\033[92m%s\033[0m\n", str)
 							continue firstOuter
 						}
 
@@ -374,23 +374,23 @@ firstOuter:
 
 		case 5: // Delete user account
 			if (phoneNumber == "") || (password == "") {
-				fmt.Printf("\nYou have to login first!\n")
+				fmt.Printf("\n\033[91mYou have to login first!\033[0m\n")
 			} else {
 				str, err := controllers.DeleteAccount(db, phoneNumber, password)
 				if err != nil {
 					fmt.Println("")
-					log.Printf("Error: %s\n", err.Error())
+					log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 				} else {
 					_ = controllers.LogOutAccount(&phoneNumber, &password)
 					fmt.Println("")
-					log.Printf("%s", str)
+					log.Printf("\033[92m%s\033[0m\n", str)
 					continue firstOuter
 				}
 			}
 
 		case 6: // Top-up balance user account
 			if (phoneNumber == "") || (password == "") {
-				fmt.Printf("\nYou have to login first!\n")
+				fmt.Printf("\n\033[91mYou have to login first!\033[0m\n")
 			} else {
 				var topupAmount float64
 				fmt.Print("\nEnter top amount: ")
@@ -398,16 +398,16 @@ firstOuter:
 				str, err := controllers.Topup(db, phoneNumber, topupAmount)
 				if err != nil {
 					fmt.Printf("\n")
-					log.Printf("Error: %s\n", err.Error())
+					log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 				} else {
 					fmt.Printf("\n")
-					fmt.Printf("%s\n", str)
+					log.Printf("\033[92m%s\033[0m\n", str)
 				}
 			}
 
 		case 7: // Transfer balance to another account
 			if (phoneNumber == "") || (password == "") {
-				fmt.Printf("\nYou have to login first!\n")
+				fmt.Printf("\n\033[91mYou have to login first!\033[0m\n")
 			} else {
 				var phoneNumberRecipient string
 				var transferAmount float64
@@ -418,16 +418,16 @@ firstOuter:
 				str, err := controllers.Transfer(db, phoneNumber, phoneNumberRecipient, transferAmount)
 				if err != nil {
 					fmt.Println("")
-					log.Printf("Error: %s\n", err.Error())
+					log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 				} else {
 					fmt.Println("")
-					log.Printf("%s\n", str)
+					log.Printf("\033[92m%s\033[0m\n", str)
 				}
 			}
 
 		case 8: //Display top-up history
 			if (phoneNumber == "") || (password == "") {
-				fmt.Printf("\nYou have to login first!\n")
+				fmt.Printf("\n\033[91mYou have to login first!\033[0m\n")
 			} else {
 				histories, err := controllers.DisplayTopupHistories(db, phoneNumber)
 				checkError(err)
@@ -449,7 +449,7 @@ firstOuter:
 
 		case 9: // Display transfer history user account
 			if (phoneNumber == "") || (password == "") {
-				fmt.Printf("\nYou have to login first!\n")
+				fmt.Printf("\n\033[91mYou have to login first!\033[0m\n")
 			} else {
 				tfHistory := `
 				Display transfer history as:
@@ -503,14 +503,12 @@ firstOuter:
 					case 3:
 						tfHistoryLoop = false
 					}
-
 				}
-
 			}
 
 		case 10: // Read other user account
 			if (phoneNumber == "") || (password == "") {
-				fmt.Printf("\nYou have to login first!\n")
+				fmt.Printf("\n\033[91mYou have to login first!\033[0m\n")
 			} else {
 				var otherPhoneNumber string
 				fmt.Print("\nEnter other user's phone number\t: ")
@@ -522,16 +520,16 @@ firstOuter:
 					str, err := controllers.ReadOtherAccount(db, otherPhoneNumber)
 					if err != nil {
 						fmt.Println("")
-						log.Printf("Error: %s\n", err.Error())
+						log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 					} else {
-						fmt.Printf("\n%s\n", str)
+						fmt.Printf("\033[95m\n%s\033[0m\n", str)
 					}
 				}
 			}
 
 		case 11: // Logout from user account
 			str := controllers.LogOutAccount(&phoneNumber, &password)
-			fmt.Println(str)
+			fmt.Printf("\033[92m%s\033[0m\n", str)
 
 		case 12: // Exit from program
 			loop = false
@@ -542,6 +540,6 @@ firstOuter:
 
 func checkError(err error) {
 	if err != nil {
-		log.Printf("Error: %s\n", err.Error())
+		log.Printf("\033[91mError: %s\033[0m\n", err.Error())
 	}
 }

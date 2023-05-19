@@ -139,7 +139,7 @@ func ReadOtherAccount(db *sql.DB, phoneNumber string) (string, error) {
 	outputStr += fmt.Sprintln("-----------------------------------------")
 
 	fmt.Println("")
-	log.Printf("[SUCCESS] Account is found.\n")
+	log.Printf("\033[92m[SUCCESS] Account is found.\033[0m\n")
 
 	return outputStr, nil
 }
